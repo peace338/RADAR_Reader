@@ -265,7 +265,7 @@ class trackingCfg(config, rangeBasedPruningCfg):
 	maxTick = 40
 	minTick = 0
 	thresholdTick = 18			# (18)
-	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=np.float)
+	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=float)
 
 	CV_xVariance = 1.0			# (0.1) --> (1.0)
 	CV_yVariance = 4.0			# (4.0) --> (4.0)
@@ -296,7 +296,7 @@ class trackingCfgSEW(config, rangeBasedPruningCfg):
 	maxTick = 40
 	minTick = 0
 	thresholdTick = 18			# (18)
-	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=np.float)
+	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=float)
 
 	CV_xVariance = 1.0			# (0.1) --> (1.0)
 	CV_yVariance = 4.0			# (4.0) --> (4.0)
@@ -327,7 +327,7 @@ class trackingCfgRCCW(config, rangeBasedPruningCfg):
 	maxTick = 40
 	minTick = 0
 	thresholdTick = 18			# (18) --> 20
-	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=np.float)
+	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=float)
 
 	CV_xVariance = 1.0			# (0.1) --> (1.0)
 	CV_yVariance = 4.0			# (4.0) --> (4.0)
