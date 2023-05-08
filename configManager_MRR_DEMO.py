@@ -184,8 +184,8 @@ class clusterCfgMRR(config):
 		minPointsInCluster = 1
 	dBScanNeighbourLim = 4
 
-	ellipsoidA = 2.0				# X축: (2.0)
-	ellipsoidB = 1.0				# Y축: (1.0)
+	ellipsoidA = 3.0				# X축: (2.0) --> 3.0
+	ellipsoidB = 1.5				# Y축: (1.0) --> 1.5
 	ellipsoidC = 3.0				# 속도: (3.0)
 
 
@@ -212,8 +212,8 @@ class clusterCfgRCCW(config):
 		minPointsInCluster = 1
 	dBScanNeighbourLim = 4
 
-	ellipsoidA = 3.0				# X축: (2.0) --> 3.0
-	ellipsoidB = 3.0				# Y축: (2.0) --> 3.0
+	ellipsoidA = 3.0				# X축: (3.0)
+	ellipsoidB = 3.0				# Y축: (3.0)
 	ellipsoidC = 3.0				# 속도: (3.0)
 
 
@@ -222,7 +222,7 @@ class clusterCfgGuardRail(config):
 	maxCluster = 50
 	minPointsInCluster = 1
 
-	ellipsoidA = 4.0				# X축: (3.0) --> (4.5)
+	ellipsoidA = 4.0				# X축: (4.0)
 	ellipsoidB = 0.5				# Y축: (0.5)
 	ellipsoidC = 100.0				# 속도: (100.0)
 
@@ -251,7 +251,7 @@ class trackingCfg(config, rangeBasedPruningCfg):
 
 	associateGamma = 16.5 	# 정확도 90%				# (16.5)
 	rangeAssocThresh = 3.0  # unit m					# (3.0)
-	velAssocThresh = 1.5  # unit m/s					# (3.5) --> 1.5
+	velAssocThresh = 1.5  # unit m/s					# (1.5)
 	xAssocThresh = 3.0									# (3.0)
 	yAssocThresh = 2.0  								# (2.0)
 	azimAssocThresh = np.sin(20 * np.pi / 180)			# (20)
@@ -265,7 +265,7 @@ class trackingCfg(config, rangeBasedPruningCfg):
 	maxTick = 40
 	minTick = 0
 	thresholdTick = 18			# (18)
-	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=float)
+	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=np.float)
 
 	CV_xVariance = 1.0			# (0.1) --> (1.0)
 	CV_yVariance = 4.0			# (4.0) --> (4.0)
@@ -282,7 +282,7 @@ class trackingCfgSEW(config, rangeBasedPruningCfg):
 
 	associateGamma = 16.5 	# 정확도 90%				# (16.5)
 	rangeAssocThresh = 4.0  # unit m					# (4.0)
-	velAssocThresh = 2.5  # unit m/s					# (4.0) --> 2.5
+	velAssocThresh = 2.5  # unit m/s					# (2.5)
 	xAssocThresh = 3.0									# (3.0)
 	yAssocThresh = 3.0  								# (3.0)
 	azimAssocThresh = np.sin(20 * np.pi / 180)			# (20)
@@ -296,7 +296,7 @@ class trackingCfgSEW(config, rangeBasedPruningCfg):
 	maxTick = 40
 	minTick = 0
 	thresholdTick = 18			# (18)
-	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=float)
+	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=np.float)
 
 	CV_xVariance = 1.0			# (0.1) --> (1.0)
 	CV_yVariance = 4.0			# (4.0) --> (4.0)
@@ -312,10 +312,10 @@ class trackingCfgRCCW(config, rangeBasedPruningCfg):
 	maxTracker = 50					# (30) --> 50
 
 	associateGamma = 16.5 	# 정확도 90%				# (16.5)
-	rangeAssocThresh = 4.0  # unit m					# (4.0) --> 3.0 --> 4.0
-	velAssocThresh = 3.0   # unit m/s					# (4.0) --> 1.0 --> 3.0
-	xAssocThresh = 4.0									# (3.0) --> 2.0 --> 4.0
-	yAssocThresh = 4.0  								# (3.0) --> 2.0 --> 4.0
+	rangeAssocThresh = 4.0  # unit m					# (4.0)
+	velAssocThresh = 3.0   # unit m/s					# (3.0)
+	xAssocThresh = 4.0									# (4.0)
+	yAssocThresh = 4.0  								# (4.0)
 	azimAssocThresh = np.sin(20 * np.pi / 180)			# (20)
 
 #	distAssocThreshSq = 1.65  	# unit m^2, original Value
@@ -327,7 +327,7 @@ class trackingCfgRCCW(config, rangeBasedPruningCfg):
 	maxTick = 40
 	minTick = 0
 	thresholdTick = 18			# (18) --> 20
-	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=float)
+	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=np.float)
 
 	CV_xVariance = 1.0			# (0.1) --> (1.0)
 	CV_yVariance = 4.0			# (4.0) --> (4.0)

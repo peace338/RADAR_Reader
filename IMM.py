@@ -139,10 +139,7 @@ def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
 		else:
 			numProc_ekf += 1
 
-		if currTrack.mode != RadarInfo.mode:
-			nFree = ml.invalidateCurrTrack(currTrack, nFree, freeTrackerList)
-			continue
-#		if RadarInfo.mode == 0:
+#		if currTrack.mode != RadarInfo.mode:
 #			nFree = ml.invalidateCurrTrack(currTrack, nFree, freeTrackerList)
 #			continue
 
@@ -153,8 +150,22 @@ def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
 		FilterObj = Filter()
 
 		if CONST.IMM_angle_vel_cal or CONST.IMM_CA:
-			currTrack.prevXd = currTrack.state[0].stateVectorXYZ[2]
-			currTrack.prevYd = currTrack.state[0].stateVectorXYZ[3]
+			##### 이전 Frame Track의 X, Y, Xd, Yd 저장
+			currTrack.preprepreX = currTrack.prepreX
+			currTrack.preprepreY = currTrack.prepreY
+			currTrack.preprepreXd = currTrack.prepreXd
+			currTrack.preprepreYd = currTrack.prepreYd
+
+			currTrack.prepreX = currTrack.preX
+			currTrack.prepreY = currTrack.preY
+			currTrack.prepreXd = currTrack.preXd
+			currTrack.prepreYd = currTrack.preYd
+
+			currTrack.preX = currTrack.stateVectorXYZ[0]
+			currTrack.preY = currTrack.stateVectorXYZ[1]
+			currTrack.preXd = currTrack.stateVectorXYZ[2]
+			currTrack.preYd = currTrack.stateVectorXYZ[3]
+			##### 이전 Frame Track의 X, Y, Xd, Yd 저장
 
 		interaction(currTrack)
 		FilterObj.initialize_mode(currTrack, cfg.trackingCfg)
@@ -176,28 +187,11 @@ def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
 
 		distMetricMin = 655350.0
 		iAssocMeas = None
-
-		### HSLee 추가 2022.11.08 : RCCW용
-#		if (RadarInfo.mode == 2) and (FilterObj.mode_list[0].predictedMeas[0] < 6):
-#			if (RadarInfo.position == 1) and (FilterObj.mode_list[0].predictedMeas[2] < -0.707):
-#				nFree = ml.invalidateCurrTrack(currTrack, nFree, freeTrackerList)
-#				continue
-#			if (RadarInfo.position == 2) and (FilterObj.mode_list[0].predictedMeas[2] > 0.707):
-#				nFree = ml.invalidateCurrTrack(currTrack, nFree, freeTrackerList)
-#				continue
-		### HSLee 추가 2022.11.08
+		currTrack.associatedValid = 0
 
 		for currMeas in measList[:]:
 			if currTrack.associatedObj == None and not (currMeas.isAssociated):
 				innovation = FilterObj.mode_list[0].predictedMeas - currMeas.measVectorRRD
-
-				### HSLee 추가 2022.11.08 : RCCW용
-#				if (RadarInfo.mode == 2) and (FilterObj.mode_list[0].predictedMeas[0] < 6):
-#					if (RadarInfo.position == 1) and (FilterObj.mode_list[0].predictedMeas[2] < -0.707) and (innovation[2] < 0):
-#						continue
-#					if (RadarInfo.position == 2) and (FilterObj.mode_list[0].predictedMeas[2] > 0.707) and (innovation[2] > 0):
-#						continue
-				### HSLee 추가 2022.11.08
 
 				if abs(innovation[0]) > trackingCfg.rangeAssocThresh:
 					continue
@@ -211,7 +205,12 @@ def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
 					continue
 				if abs(innovation1[1]) > trackingCfg.yAssocThresh:
 					continue
-				### HSLee 수정 2022.07.21
+
+				### Object Flag 적용
+				if RadarInfo.mode == 2:
+					if (currTrack.statusFlag & 7) != (currMeas.statusFlag & 7):
+						continue
+				### Object Flag 적용
 
 				FilterObj.calInvS(currTrack, currMeas)
 				pdistSq, canBeAssociated = FilterObj.get_mahalanobis_dist(currMeas, currTrack, trackingCfg)
@@ -239,7 +238,7 @@ def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
 				nAssociated += 1
 
 				if CONST.STATUS_FLAG_ASC:
-					if currTrack.statusFlag != currTrack.associatedObj.statusFlag:
+					if (currTrack.statusFlag & 7) != (currTrack.associatedObj.statusFlag & 7):
 						currTrack.transitionScore += 1
 					else:
 						currTrack.transitionScore = 0
@@ -272,6 +271,11 @@ def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
 				currTrack.RCS_variation = currTrack.associatedObj.RCS_variation
 				currTrack.RCS_slope = currTrack.associatedObj.RCS_slope
 				currTrack.SNR = currTrack.associatedObj.SNR
+				currTrack.Status_Flag0 = currTrack.statusFlag
+
+				##### Track의 Association 유무 Flag
+				currTrack.associatedValid = 1
+				##### Track의 Association 유무 Flag
 
 				FilterObj.likelihoodFunc()
 
@@ -287,6 +291,8 @@ def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
 				iAssocMeas.isAssociated = False
 
 		if currTrack.associatedObj == None:
+			currTrack.associatedValid = 0
+
 			if CONST.STATUS_FLAG_ASC:
 				currTrack.transitionScore = 0
 
@@ -328,6 +334,18 @@ def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
 		else:
 			currTrack.plotValidity = True
 
+		currTrack.prevXd = (currTrack.stateVectorXYZ[0] - currTrack.preX)/(1*cfg.trackingCfg.td)
+		currTrack.prevYd = (currTrack.stateVectorXYZ[1] - currTrack.preY)/(1*cfg.trackingCfg.td)
+		currTrack.prevprevXd = (currTrack.stateVectorXYZ[0] - currTrack.prepreX)/(2*cfg.trackingCfg.td)
+		currTrack.prevprevYd = (currTrack.stateVectorXYZ[1] - currTrack.prepreY)/(2*cfg.trackingCfg.td)
+		currTrack.prevprevprevXd = (currTrack.stateVectorXYZ[0] - currTrack.preprepreX)/(3*cfg.trackingCfg.td)
+		currTrack.prevprevprevYd = (currTrack.stateVectorXYZ[1] - currTrack.preprepreY)/(3*cfg.trackingCfg.td)
+
+		currTrack.prevXd = (currTrack.stateVectorXYZ[0] - currTrack.preprepreX)/(3*cfg.trackingCfg.td)
+		currTrack.prevYd = (currTrack.stateVectorXYZ[1] - currTrack.preprepreY)/(3*cfg.trackingCfg.td)
+
+		currTrack.Status_Flag1 = currTrack.associatedValid
+
 	if nFree > 0:
 		for currTrack in freeTrackerList[:]:
 			trackingList.rmObj(currTrack)
@@ -339,15 +357,15 @@ def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
 		### HSLee 추가 2022.08.22
 		if RadarInfo.mode == 1:
 			if RadarInfo.position == 1:				# Left
-				leftscale1 = -0.5					# (-1.2)
-				rightscale1 = 0.3					# (0.5)
+				leftscale1 = -0.5					# (-0.5)
+				rightscale1 = 0.3					# (0.3)
 				leftscale2 = -4.0					# (-4.0)
 				rightscale2 = 3.0					# (3.0)
 				leftscale3 = -7.0					# (-7.0)
 				rightscale3 = 7.0					# (7.0)
 			elif RadarInfo.position == 2:			# Right
-				leftscale1 = -0.3					# (-0.5)
-				rightscale1 = 0.5					# (1.2)
+				leftscale1 = -0.3					# (-0.3)
+				rightscale1 = 0.5					# (0.5)
 				leftscale2 = -3.0					# (-3.0)
 				rightscale2 = 4.0					# (4.0)
 				leftscale3 = -7.0					# (-7.0)

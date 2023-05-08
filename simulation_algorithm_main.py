@@ -39,36 +39,43 @@ def radar_algorithm_simulation(object_list, tracker, track_frame_number, can_dat
 
     timeStamp = 0
 
-    if track_frame_number == 955:
+    if track_frame_number == 275:
         aa = 1
 
     RadarAngle = 45.0
     RadarInfo = DT.radar_info()
-    RadarInfo.mode = can_data[4]		                    # 1 : BCW, 2 : RCCW, 3 : SEW
-    RadarInfo.position = can_data[5]                        # 1 : Left, 2 : Right
-    vehicle_speed = can_data[6]/3.6                         # [m/s]
-    vehicle_steer_angle = (can_data[14]*256 + can_data[15])/10   # Steer Angle(deg)
-    if vehicle_steer_angle > 3276.7 :
+    RadarInfo.mode = can_data[4]		                              # 1 : BCW, 2 : RCCW, 3 : SEW
+    RadarInfo.position = can_data[5]                                  # 1 : Left, 2 : Right
+    vehicle_speed = can_data[6]/3.6                                   # [m/s]
+    vehicle_steer_angle = (can_data[14] * 256 + can_data[15])/10      # Steer Angle(deg)
+    if vehicle_steer_angle > 3276.7:
         vehicle_steer_angle -= 6553.5
-
+    vehicle_steer_angle = vehicle_steer_angle * 38.0 / 650.0
+ 
     if RadarInfo.mode == 2:
         if RadarInfo.position == 1:
             RadarInfo.angle = 0             # RadarAngle
+            RadarInfo.StaticRemoveAngle = RadarAngle
         elif RadarInfo.position == 2:
             RadarInfo.angle = 0             # -RadarAngle
+            RadarInfo.StaticRemoveAngle = -RadarAngle
         else:
             RadarInfo.angle = 0             # RadarAngle
+            RadarInfo.StaticRemoveAngle = RadarAngle
     else:
         if RadarInfo.position == 1:
             RadarInfo.angle = -RadarAngle
+            RadarInfo.StaticRemoveAngle = -RadarAngle
         elif RadarInfo.position == 2:
             RadarInfo.angle = RadarAngle
+            RadarInfo.StaticRemoveAngle = RadarAngle
         else:
             RadarInfo.angle = RadarAngle
+            RadarInfo.StaticRemoveAngle = RadarAngle
 
     # ============================= Clustering =====================================
 #    print(track_frame_number)
-    Radar_raw_measurement = ml.conversion(object_list, RadarInfo, vehicle_speed)  # conversion data type to suit to this simulation code
+    Radar_raw_measurement = ml.conversion(object_list, RadarInfo, vehicle_speed, vehicle_steer_angle)  # conversion data type to suit to this simulation code
     # Pruning : Do Something(input : Radar_raw_measurement, output :cfarOut3DList)
     # Radar_raw_measurement = prune_object.remove_far_obj(Radar_raw_measurement)
     # Radar_raw_measurement = prune_object.remove_recede_obj(Radar_raw_measurement)
@@ -93,11 +100,11 @@ def radar_algorithm_simulation(object_list, tracker, track_frame_number, can_dat
         trackingCfg = cfgMan.trackingCfg
 
     cfarOut3DListGuardRail = copy.deepcopy(cfarOut3DList)
-    clusterList, clusterOutputList = CL.clusteringDBscanRun(cfarOut3DList, clusterCfg, resList, domain)
+    clusterList, clusterOutputList = CL.clusteringDBscanRun(cfarOut3DList, clusterCfg, resList, domain, RadarInfo)
 
     if RadarInfo.mode == 1:
-        clusterListGuardRail, clusterOutputListGuardRail = CL.clusteringDBscanRun(cfarOut3DListGuardRail, cfgMan.clusterCfgGuardRail, resList, domain)
-        ThresholdY = ml.estimateGuardRail(clusterListGuardRail)
+        clusterListGuardRail, clusterOutputListGuardRail = CL.clusteringDBscanRun(cfarOut3DListGuardRail, cfgMan.clusterCfgGuardRail, resList, domain, RadarInfo)
+        ThresholdY = ml.estimateGuardRail(clusterListGuardRail, RadarInfo)
 
     measList = ml.populateTrackingList(clusterOutputList, ThresholdY, RadarInfo)
 

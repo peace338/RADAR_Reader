@@ -3282,12 +3282,23 @@ def stateCovmatMeasurementUpdate(currTrack, kalmanGain, Hmat):
 	currTrack.Covariance = np.matmul(a, currTrack.Covariance)
 
 
-def estimateGuardRail(clusterList):
+def estimateGuardRail(clusterList, RadarInfo):
 	ThY = 40.0
+	Angle_Left = 0
+	Angle_Right = 0
+	Left_Idx = 0
+	Right_Idx = 0
 	for cluster in clusterList:
 		idx = 0
 		targetX = []
 		targetY = []
+		targetV_Plus = []
+		targetV_Minus = []
+		Idx_plus = 0
+		Idx_minus = 0
+		Tar_Plus = 1
+		diffV = 10
+		autoCal_valid = 0
 
 		for target in cluster:
 			if abs(target.rotatex) > 18.0:
@@ -3296,18 +3307,73 @@ def estimateGuardRail(clusterList):
 			targetX.append(target.rotatex)
 			targetY.append(target.rotatey)
 
+			if abs(target.speed) >= 20:
+				continue
+			if target.speed >= 0:
+				Idx_plus += 1
+				targetV_Plus.append(target.speed)
+			else:
+				Idx_minus += 1
+				targetV_Minus.append(target.speed)
+
+		if (Idx_plus > 2) or (Idx_minus > 2):
+			if Idx_plus > Idx_minus:
+				Tar_Plus = 1
+				diffV = max(targetV_Plus) - min(targetV_Plus)
+			else:
+				Tar_Plus = 0
+				diffV = max(targetV_Minus) - min(targetV_Minus)
+
 		if idx > 0:
 			diffX = max(targetX) - min(targetX)
 			diffY = max(targetY) - min(targetY)
-			if (idx > 2) and (diffX > 6.0) and (diffY < 0.7):			# (4.5, 1.0) --> 6.0, 0.7
-				TmpY = min(targetY)
-			elif (idx > 2) and (diffX >= 8.0):							# (6.0) --> 8.0
-				TmpY = min(targetY)
+
+			minX = min(targetX)
+			maxX = max(targetX)
+			minX_Idx = targetX.index(minX)
+			maxX_Idx = targetX.index(maxX)
+			minY = targetY[minX_Idx]
+			maxY = targetY[maxX_Idx]
+
+			if Tar_Plus == 1:
+				if (idx > 2) and (diffX > 6.0) and (diffY < 0.7) and (diffV > 7):			# (4.5, 1.0) --> (6.0, 0.7)
+					TmpY = min(targetY)
+					autoCal_valid = 1
+				elif (idx > 2) and (diffX >= 8.0) and (diffV > 7):						    # (6.0) --> (8.0)
+					TmpY = min(targetY)
+				else:
+					TmpY = 40.0
 			else:
 				TmpY = 40.0
 
 			if ThY > TmpY:
 				ThY = TmpY
+
+			if (autoCal_valid == 1) and (idx > 5):
+				DevX = maxX - minX
+				DevY = maxY - minY
+				Cal_Angle_Deg = math.atan2(DevY, DevX)*180/np.pi
+
+				if RadarInfo.position == 1:
+					Left_Idx = Left_Idx + 1
+					Angle_Left = Angle_Left + Cal_Angle_Deg
+				elif RadarInfo.position == 2:
+					Right_Idx = Right_Idx + 1
+					Angle_Right = Angle_Right + Cal_Angle_Deg
+				else:
+					Angle_Left = Angle_Left
+					Angle_Right = Angle_Right
+
+	if Left_Idx != 0:
+		Angle_Left = Angle_Left/Left_Idx
+#		CalAngleLeft_Idx = CalAngleLeft_Idx + 1
+#		if CalAngleLeft_Idx <= RadarInfo.CalNum:
+#			CalAngleLeft = CalAngleLeft + Angle_Left/RadarInfo.CalNum
+	if Right_Idx != 0:
+		Angle_Right = Angle_Right/Right_Idx
+#		CalAngleRight_Idx = CalAngleRight_Idx + 1
+#		if CalAngleRight_Idx <= RadarInfo.CalNum:
+#			CalAngleRight = CalAngleRight + Angle_Right/RadarInfo.CalNum
 
 	ThresholdY = ThY
 
@@ -4248,11 +4314,12 @@ def findIDlistforDEBUG(cfarOutNDList, targetIdxPlotSpec):
 	return tmpDetIDList
 
 
-def conversion(object_list, RadarInfo, vehicle_speed):
+def conversion(object_list, RadarInfo, vehicle_speed, vehicle_steer_angle):
 	cfarOut3DList = []
 
-	rotate_ang = RadarInfo.angle
 	mode = RadarInfo.mode
+	remove_ang = RadarInfo.StaticRemoveAngle
+
 	tmpIdx = 1
 	for obj in object_list:
 		tmpObj = DT.cfarOutFmt3D()
@@ -4262,13 +4329,6 @@ def conversion(object_list, RadarInfo, vehicle_speed):
 		tmpObj.dopplerIdx = obj.doppler_idx
 		tmpObj.range = obj.range
 		tmpObj.speed = obj.speed
-
-		### HSLee 추가 2022.10.24 : Static Object Remove
-		if (mode == 3) and (abs(tmpObj.speed + vehicle_speed) < 0.5):
-			continue
-		if (mode == 2) and (abs(tmpObj.speed + vehicle_speed) < 1.0):				# (0.42) --> 1.2 --> 1.0
-			continue
-		### HSLee 추가 2022.10.24 : Static Object Remove
 
 		if obj.sin_azim > 1:
 			obj.sin_azim = 1
@@ -4288,16 +4348,64 @@ def conversion(object_list, RadarInfo, vehicle_speed):
 		tmpObj.rotatey = obj.rotate_y
 
 		tmpObj.velDisambFacValidity = obj.vel_disamb_fac_valid
-		tmpObj.statusFlag = obj.status_flag
+#		tmpObj.statusFlag = obj.status_flag
 
-		compang_rad = math.atan2(tmpObj.x, tmpObj.y)
-		tmpObj.sinAzim = np.sin(compang_rad)
+		obj_ang_rad = math.atan2(tmpObj.x, tmpObj.y)
+		tmpObj.sinAzim = np.sin(obj_ang_rad)
 		if CONST.SPEED_COMP_BY_ANGLE:
-			tmpObj.xd = tmpObj.speed * np.sin(compang_rad)
-			tmpObj.yd = tmpObj.speed * np.cos(compang_rad)
+			tmpObj.xd = tmpObj.speed * np.sin(obj_ang_rad)
+			tmpObj.yd = tmpObj.speed * np.cos(obj_ang_rad)
 		else:
 			tmpObj.xd = 0
 			tmpObj.yd = tmpObj.speed
+
+		### HSLee 추가 2022.10.24 : Static Object Process - Object의 Flag 적용
+#		static_angle = remove_ang
+		static_angle = remove_ang + (obj_ang_rad * 180 / np.pi)
+		if static_angle < -75.0:
+			static_angle = -75.0
+		elif static_angle > 75.0:
+			static_angle = 75.0
+
+		if vehicle_speed == 0.0:
+			th_vel = 0.5  # (0.5)
+		elif (0.0 < vehicle_speed) and (vehicle_speed < 5.0):
+			th_vel = 1.2  # (1.2)
+		else:
+			th_vel = 2.4  # (3.3)
+
+		if mode == 2:		# RCCW
+#			staticVel_y = tmpObj.speed
+			staticVel_y = tmpObj.speed / np.cos(static_angle * np.pi / 180)
+			vehicleVel_y = vehicle_speed * np.cos(vehicle_steer_angle * np.pi / 180)
+			Vel_y = staticVel_y + vehicleVel_y
+
+			if (abs(Vel_y) <= th_vel) or (staticVel_y == 0.0):
+				tmpObj.statusFlag = (tmpObj.statusFlag | 1)				 # Static Obj
+			elif staticVel_y < 0.0:
+				tmpObj.statusFlag = (tmpObj.statusFlag | 2)				 # Coming Obj
+			else:		# staticVel_y > 0
+				tmpObj.statusFlag = (tmpObj.statusFlag | 4)				 # Going Obj
+		else:				# BCW or SEW
+#			staticVel_y = tmpObj.speed
+			staticVel_y = tmpObj.speed / np.cos(static_angle * np.pi / 180)
+			vehicleVel_y = vehicle_speed * np.cos(vehicle_steer_angle * np.pi / 180)
+
+			if (RadarInfo.position == 1 and tmpObj.rotatex >= 0) or (RadarInfo.position == 2 and tmpObj.rotatex <= 0):		# 전방 Obj
+				Vel_y = staticVel_y + vehicleVel_y
+			elif (RadarInfo.position == 1 and tmpObj.rotatex < 0) or (RadarInfo.position == 2 and tmpObj.rotatex > 0):		# 후방 Obj
+				Vel_y = staticVel_y - vehicleVel_y
+			else:
+				Vel_y = staticVel_y - vehicleVel_y
+
+#			th_vel = 3.3
+			if abs(Vel_y) <= th_vel:
+				tmpObj.statusFlag = (tmpObj.statusFlag | 1)				 # Static Obj
+			elif staticVel_y < 0.0:
+				tmpObj.statusFlag = (tmpObj.statusFlag | 2)				 # Coming Obj
+			else:		# staticVel_y >= 0
+				tmpObj.statusFlag = (tmpObj.statusFlag | 4)				 # BCW(or SEW) Obj (Coming or Going Obj)
+		### HSLee 추가 2022.10.24 : Static Object Process - Object의 Flag 적용
 
 		tmpIdx += 1
 		cfarOut3DList.append(tmpObj)

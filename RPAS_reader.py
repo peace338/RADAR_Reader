@@ -39,7 +39,8 @@ SIMULATED_OBJECT_ATTRIBUTES_LIST = ["detID","clusterId","rangeIdx","dopplerIdx",
 SIMULATED_TRACK_ATTRIBUTES_LIST = ["ID","SNR","age","associ_ID","dopplerSNR",\
                                     "measVectorRRD_R","measVectorRRD_vel","measVectorRRD_Theta","statVecXYZ_x","statVecXYZ_y",\
                                     "statVecXYZ_xd","statVecXYZ_yd","peakVal","prevXd","prevYd",\
-                                    "rangeSNR","tick","xSize","ySize","plotValidity"]
+                                    "rangeSNR","tick","xSize","ySize","plotValidity",\
+                                    "Status_Flag0","Status_Flag1"]
 
 
 #####################################################################################
@@ -596,7 +597,7 @@ class App(QWidget):
     #####################################################################################
     def folder_select_btn_event(self):
         tmp_file_name = self.file_path_line_edit.text()
-        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", filter = "Radar Data Bin(*.rdb)")
+        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/KIA_BSD/20230327_BCW", filter = "Radar Data Bin(*.rdb)")
         self.no_video_flag = 0
         self.no_video2_flag = 0
         self.no_simulation_data_flag = 0
@@ -882,37 +883,37 @@ class App(QWidget):
                 if answer == QMessageBox.StandardButton.Cancel :
                     return
             self.simulation_save_file = open(self.simulation_file_name,'wb')
-        try :
-            if (self.radar1_simulation_checkbox.isChecked() & self.radar1_simulation_checkbox.isEnabled()) :
-                self.simulation_btn.setVisible(False)
-                self.simulation_progress_bar.setVisible(True)
-                self.simulation_progress_bar.setRange(0,self.radar_end_frame_num)
-                simulated_track_data = DT.genTracker()
-                for ii in range(self.radar_end_frame_num) :
-                    self.get_original_radar_data_in_frame(ii,IT_IS_SIMULATION,RADAR1)
-                    simulated_object_data = SAM.radar_algorithm_simulation(self.original_object_list, simulated_track_data,ii, self.can_data)
-                    self.save_simulation_data(simulated_object_data, simulated_track_data, ii, RADAR1)
-                    self.simulation_progress_bar.setValue(ii)
-                self.simulation_btn.setVisible(True)
-                self.simulation_progress_bar.setVisible(False)
-            if (self.radar2_simulation_checkbox.isChecked() & self.radar2_simulation_checkbox.isEnabled()) :                
-                self.simulation_btn.setVisible(False)
-                self.simulation_progress_bar.setVisible(True)
-                self.simulation_progress_bar.setRange(0,self.radar_end_frame_num)
-                simulated_track_data = DT.genTracker()
-                for ii in range(self.radar_end_frame_num) :
-                    self.get_original_radar_data_in_frame(ii,IT_IS_SIMULATION,RADAR2)
-                    simulated_object_data = SAM.radar_algorithm_simulation(self.original_object_list, simulated_track_data,ii, self.can_data)
-                    self.save_simulation_data(simulated_object_data, simulated_track_data, ii, RADAR2)
-                    self.simulation_progress_bar.setValue(ii)
-                self.simulation_btn.setVisible(True)
-                self.simulation_progress_bar.setVisible(False)
-            if (self.radar1_simulation_checkbox.isChecked() | self.radar2_simulation_checkbox.isChecked()) :
-                self.no_simulation_data_flag = 0
-                self.simulation_save_file.close()
-        except :
+        #try :
+        if (self.radar1_simulation_checkbox.isChecked() & self.radar1_simulation_checkbox.isEnabled()) :
+            self.simulation_btn.setVisible(False)
+            self.simulation_progress_bar.setVisible(True)
+            self.simulation_progress_bar.setRange(0,self.radar_end_frame_num)
+            simulated_track_data = DT.genTracker()
+            for ii in range(self.radar_end_frame_num) :
+                self.get_original_radar_data_in_frame(ii,IT_IS_SIMULATION,RADAR1)
+                simulated_object_data = SAM.radar_algorithm_simulation(self.original_object_list, simulated_track_data, ii, self.can_data)
+                self.save_simulation_data(simulated_object_data, simulated_track_data, ii, RADAR1)
+                self.simulation_progress_bar.setValue(ii)
             self.simulation_btn.setVisible(True)
             self.simulation_progress_bar.setVisible(False)
+        if (self.radar2_simulation_checkbox.isChecked() & self.radar2_simulation_checkbox.isEnabled()) :                
+            self.simulation_btn.setVisible(False)
+            self.simulation_progress_bar.setVisible(True)
+            self.simulation_progress_bar.setRange(0,self.radar_end_frame_num)
+            simulated_track_data = DT.genTracker()
+            for ii in range(self.radar_end_frame_num) :
+                self.get_original_radar_data_in_frame(ii,IT_IS_SIMULATION,RADAR2)
+                simulated_object_data = SAM.radar_algorithm_simulation(self.original_object_list, simulated_track_data, ii, self.can_data)
+                self.save_simulation_data(simulated_object_data, simulated_track_data, ii, RADAR2)
+                self.simulation_progress_bar.setValue(ii)
+            self.simulation_btn.setVisible(True)
+            self.simulation_progress_bar.setVisible(False)
+        if (self.radar1_simulation_checkbox.isChecked() | self.radar2_simulation_checkbox.isChecked()) :
+            self.no_simulation_data_flag = 0
+            self.simulation_save_file.close()
+        # except :
+        #     self.simulation_btn.setVisible(True)
+        #     self.simulation_progress_bar.setVisible(False)
         self.load_btn_event()
 
     def view_reset_shortcut_event(self) :
@@ -1068,7 +1069,8 @@ class App(QWidget):
             vehicle_steer_angle = (self.can_data[14]*256 + self.can_data[15])/10   # Steer Angle(deg)
             if vehicle_steer_angle > 3276.7 :
                 vehicle_steer_angle -= 6553.5
-            print(self.can_data,round(vehicle_steer_angle,1))
+            vehicle_steer_angle = vehicle_steer_angle * 38.0/650.0
+            print(self.can_data, round(vehicle_steer_angle, 1))
 
     def get_simulated_radar_data_in_frame(self, frame_index) :
         simulated_data_flag = 0
@@ -1129,8 +1131,8 @@ class App(QWidget):
     
                 for jj in range(num_track) :
                     trk = simulated_track()
-                    read_data = data_payload[ii:(ii+40)]
-                    if len(read_data) == 40 :
+                    read_data = data_payload[ii:(ii+44)]
+                    if len(read_data) == 44 :
                         trk.ID                          = (read_data[ 1]*256 + read_data[ 0])
                         trk.SNR                         = (read_data[ 3]*256 + read_data[ 2])/Q8_DIVISOR
                         trk.age                         = (read_data[ 5]*256 + read_data[ 4])
@@ -1151,36 +1153,17 @@ class App(QWidget):
                         trk.xSize                       = radar_object.uint2int_16((read_data[35]*256 + read_data[34]))/Q7_DIVISOR
                         trk.ySize                       = radar_object.uint2int_16((read_data[37]*256 + read_data[36]))/Q7_DIVISOR
                         trk.plotValidity                = (read_data[39]*256 + read_data[38])
+                        trk.Status_Flag0                = (read_data[41]*256 + read_data[40])
+                        trk.Status_Flag1                = (read_data[43]*256 + read_data[42])
                         self.simulated_track_list.append(trk)
-                    ii = ii+40
-                ii=ii+16
+                    ii = ii+44
+                ii=ii+16        # this is for CAN data
 
 
     def original_graph_update(self, obj, trk) :
         obj_spots=[]
         trk_spots=[]
-        speed_num = 0
-        speed_als_num = 0
         for ii in range(len(obj)) :
-            if obj[ii].doppler_idx >= 16 :
-                d_idx = obj[ii].doppler_idx-32
-            else :
-                d_idx = obj[ii].doppler_idx
-            amb_speed = d_idx*0.26+(obj[ii].vel_disamb_fac_valid -1)*16.2
-            if d_idx >= 0 :
-                amb_als_speed = (d_idx*0.26-8.1) + 16.2*(obj[ii].vel_disamb_fac_valid_als - 1)
-            else :
-                amb_als_speed = (d_idx*0.26+8.1) + 16.2*(obj[ii].vel_disamb_fac_valid_als - 1)
-            if abs(amb_speed - obj[ii].speed) < 0.52 :
-                speed_num += 1
-                obj[ii].status_flag = 1
-                obj[ii].z = amb_als_speed
-            elif abs(amb_als_speed - obj[ii].speed) < 0.52 :
-                speed_als_num += 1
-                obj[ii].status_flag = 2
-                obj[ii].z = amb_speed
-            else : 
-                obj[ii].status_flag = 0
             obj_spots.append({'pos':[obj[ii].x, obj[ii].y],'data': 1})
         for ii in range(len(trk)) :
             trk_spots.append({'pos':[trk[ii].x, trk[ii].y],'data': 2})
@@ -1393,16 +1376,17 @@ class App(QWidget):
             sim_object_save_data.append(round(radar_object.int2uint_16(sim_object[ii].speed)*Q7_DIVISOR,0))
             sim_object_save_data.append(round(radar_object.int2uint_16(sim_object[ii].sinAzim)*Q14_DIVISOR,0))
             sim_object_save_data.append(round(radar_object.int2uint_16(sim_object[ii].rangeVal)*Q7_DIVISOR,0))
-            sim_object_save_data.append(round((sim_object[ii].rangeSNR)*256,0))
-            sim_object_save_data.append(round((sim_object[ii].dopplerSNR)*256,0))
-            sim_object_save_data.append(round((sim_object[ii].angleSNR)*256,0))
+            sim_object_save_data.append(round((sim_object[ii].rangeSNR)*Q8_DIVISOR,0))
+            sim_object_save_data.append(round((sim_object[ii].dopplerSNR)*Q8_DIVISOR,0))
+            sim_object_save_data.append(round((sim_object[ii].angleSNR)*Q8_DIVISOR,0))
             sim_object_save_data.append(round(radar_object.int2uint_16(sim_object[ii].x)*Q7_DIVISOR,0))
             sim_object_save_data.append(round(radar_object.int2uint_16(sim_object[ii].y)*Q7_DIVISOR,0))
             sim_object_save_data.append(round((sim_object[ii].velDisambFacValidity),0))
             sim_object_save_data.append(round((sim_object[ii].statusFlag),0))
             sim_object_save_data.append(round(radar_object.int2uint_16(sim_object[ii].xd)*Q7_DIVISOR,0))
             sim_object_save_data.append(round(radar_object.int2uint_16(sim_object[ii].yd)*Q7_DIVISOR,0))
-        for ii in range(len(sim_target.List)) :
+        
+        for ii in range(len(sim_target.List)) : ## these attributes in sim_target.List[] are from dataStructure.py
             sim_track_save_data.append(round((sim_target.List[ii].ID),0))
             sim_track_save_data.append(round((sim_target.List[ii].SNR)*Q8_DIVISOR,0))
             sim_track_save_data.append(round((sim_target.List[ii].age),0))
@@ -1429,6 +1413,8 @@ class App(QWidget):
             sim_track_save_data.append(round(radar_object.int2uint_16(sim_target.List[ii].xSize)*Q7_DIVISOR,0))
             sim_track_save_data.append(round(radar_object.int2uint_16(sim_target.List[ii].ySize)*Q7_DIVISOR,0))
             sim_track_save_data.append(round((sim_target.List[ii].plotValidity),0))
+            sim_track_save_data.append(round((sim_target.List[ii].Status_Flag0),0))
+            sim_track_save_data.append(round((sim_target.List[ii].Status_Flag1),0))
         sim_save_data_content = sim_object_save_data + sim_track_save_data
         
         if radar_num == 1 :
@@ -1439,6 +1425,7 @@ class App(QWidget):
         simulation_save_data_bin = header + np.ndarray.tobytes(np.array(data_header,dtype = np.uint32)) + \
             np.ndarray.tobytes(np.array(sim_save_data_content,dtype = np.uint16)) + np.ndarray.tobytes(np.array(self.can_data,dtype = np.uint8)) + np.ndarray.tobytes(np.array(95,dtype = np.uint8))
         pickle.dump(simulation_save_data_bin,self.simulation_save_file)
+
         
 ###################################### End of Internal method Function #####################################
 

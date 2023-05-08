@@ -258,7 +258,7 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 	return clusterOutputList
 
 
-def clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg):
+def clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, RadarInfo):
 	tempCluster = []
 	neighCount = 0
 
@@ -271,6 +271,12 @@ def clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg):
 		if clusteringCfg.isGuardRail == False:
 			if abs(currObj.speed - compObj.speed) > clusteringCfg.ellipsoidC:
 				continue
+
+			### Object Flag 적용
+			if RadarInfo.mode == 2:
+				if (currObj.statusFlag & 7) != (compObj.statusFlag & 7):
+					continue
+			### Object Flag 적용
 
 		if abs(currObj.rotatex - compObj.rotatex) > clusteringCfg.ellipsoidA:
 			continue
@@ -302,7 +308,7 @@ def clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg):
 	return tempCluster, neighCount
 
 
-def clusteringDBscanRun(objList, clusteringCfg, resList, domain):  # objList consist with object of class cfarOutFmt3D.
+def clusteringDBscanRun(objList, clusteringCfg, resList, domain, RadarInfo):  # objList consist with object of class cfarOutFmt3D.
 	clusterId = 0
 	clusterList = []
 	for currObj in objList:
@@ -311,7 +317,7 @@ def clusteringDBscanRun(objList, clusteringCfg, resList, domain):  # objList con
 
 		currObj.visited = True
 
-		tempCluster, neighCount = clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg)
+		tempCluster, neighCount = clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, RadarInfo)
 		tempCluster.append(currObj)
 		tmpConditon = neighCount < (clusteringCfg.minPointsInCluster - 1)
 
@@ -330,7 +336,7 @@ def clusteringDBscanRun(objList, clusteringCfg, resList, domain):  # objList con
 
 			for clusterObj in clusterList[-1]: # tag all the neighbors as visited in scope so that it will not be found again when searching neighbor's neighbor.
 				clusterObj.visited = True
-				tempCluster, neighCount = clusteringDBscan_findNeighbors2Fixed(objList, clusterObj, clusteringCfg)
+				tempCluster, neighCount = clusteringDBscan_findNeighbors2Fixed(objList, clusterObj, clusteringCfg, RadarInfo)
 
 				if neighCount >= clusteringCfg.minPointsInCluster:
 					if CONST.ellipsoidProcess:

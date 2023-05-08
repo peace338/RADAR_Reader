@@ -146,8 +146,27 @@ class trackingInput:
 		self.mixingProb = np.zeros((2,2), dtype = np.float)
 		self.mu = np.zeros(2, dtype = np.float)
 
+		self.preX = 0
+		self.preY = 0
+		self.preXd = 0
+		self.preYd = 0
+		self.prepreX = 0
+		self.prepreY = 0
+		self.prepreXd = 0
+		self.prepreYd = 0
+		self.preprepreX = 0
+		self.preprepreY = 0
+		self.preprepreXd = 0
+		self.preprepreYd = 0
+
 		self.prevXd = 0
 		self.prevYd = 0
+		self.prevprevXd = 0
+		self.prevprevYd = 0
+		self.prevprevprevXd = 0
+		self.prevprevprevYd = 0
+
+		self.associatedValid = 0
 #=========================================
 
 		self.mahalanobisDistance = 0
@@ -190,8 +209,10 @@ class trackingInput:
 		self.angleSNR = 0
 		self.peakVal = 0
 
-		self.statusFlag = -1
+		self.statusFlag = 0
 		self.transitionScore = 0
+		self.Status_Flag0 = 0
+		self.Status_Flag1 = 0
 
 		self.mode = 0
 
@@ -295,7 +316,7 @@ class cfarOutFmt3D:
 		self.velDisambFacValidity = -1
 		self.dopplerOffset = 0
 
-		self.statusFlag = -1
+		self.statusFlag = 0
 		self.isSlow = False
 
 		self.rotatex = 0
@@ -371,3 +392,5 @@ class radar_info():
 		self.mode = 0
 		self.position = 0
 		self.angle = 0
+		self.StaticRemoveAngle = 0
+		self.CalNum = 20
