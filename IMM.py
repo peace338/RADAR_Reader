@@ -124,6 +124,7 @@ def initNewTracker(currMeas, trkCfg, RadarInfo):
 	# 	print("Covariance at mode 1 : \n", currMeas.state[1].Covariance)
 
 def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
+
 	trackingList.resetTrackerAssociated()
 	freeTrackerList = []
 	selectedMeasList = []
@@ -208,7 +209,7 @@ def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
 
 				### Object Flag 적용
 				if RadarInfo.mode == 2:
-					if (currTrack.statusFlag & 7) != (currMeas.statusFlag & 7):
+					if (currTrack.statusFlag & 15) != (currMeas.statusFlag & 15):
 						continue
 				### Object Flag 적용
 
@@ -238,7 +239,7 @@ def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
 				nAssociated += 1
 
 				if CONST.STATUS_FLAG_ASC:
-					if (currTrack.statusFlag & 7) != (currTrack.associatedObj.statusFlag & 7):
+					if (currTrack.statusFlag & 15) != (currTrack.associatedObj.statusFlag & 15):
 						currTrack.transitionScore += 1
 					else:
 						currTrack.transitionScore = 0

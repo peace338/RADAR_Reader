@@ -3402,7 +3402,7 @@ def populateTrackingList(clusterOutputList, ThresholdY, RadarInfo):
 		Deg2_rad = RadarInfo.angle * np.pi / 180
 		rotateY = -clusterX * np.sin(Deg2_rad) + clusterY * np.cos(Deg2_rad)
 		if (RadarInfo.mode == 1) and (rotateY >= (ThresholdY - 0.2)):
-			continue
+			cluster.trackingInput.statusFlag =  8
 		### HSLee 추가 2022.09.16
 
 		tmpTrackingList.append(cluster.trackingInput)

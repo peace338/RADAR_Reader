@@ -1012,7 +1012,7 @@ class App(QWidget):
         num_object = data_payload_uint[11]*16777216+data_payload_uint[10]*65535+data_payload_uint[9]*256+data_payload_uint[8] # uint32 timecpucycles
         num_track = data_payload_uint[15]*16777216+data_payload_uint[14]*65535+data_payload_uint[13]*256+data_payload_uint[12] # uint32 timecpucycles
         sub_frame_num = data_payload_uint[19]*16777216+data_payload_uint[18]*65535+data_payload_uint[17]*256+data_payload_uint[16] # uint32 timecpucycles
-        print(track_frame_number,num_object)
+        print("FrameNumber : ", track_frame_number, "Detection point Number : ", num_object)
         ii=20
 
 
@@ -1070,7 +1070,8 @@ class App(QWidget):
             if vehicle_steer_angle > 3276.7 :
                 vehicle_steer_angle -= 6553.5
             vehicle_steer_angle = vehicle_steer_angle * 38.0/650.0
-            print(self.can_data, round(vehicle_steer_angle, 1))
+
+            print("CAN DATA : ",self.can_data, "Steering : ", round(vehicle_steer_angle, 1))
 
     def get_simulated_radar_data_in_frame(self, frame_index) :
         simulated_data_flag = 0
