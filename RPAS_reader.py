@@ -1033,7 +1033,7 @@ class App(QWidget):
                     obj.sin_azim_srn_lin           = (read_data[17]*256 + read_data[16])/Q8_DIVISOR
                     obj.x                          = radar_object.uint2int_16(read_data[19]*256 + read_data[18])/Q7_DIVISOR
                     obj.y                          = radar_object.uint2int_16(read_data[21]*256 + read_data[20])/Q7_DIVISOR
-                    obj.z                          = radar_object.uint2int_16(read_data[23]*256 + read_data[22])/Q7_DIVISOR
+                    obj.z                          = (read_data[23]*256 + read_data[22])
                     obj.rotate_x                   = radar_object.uint2int_16(read_data[25]*256 + read_data[24])/Q7_DIVISOR
                     obj.rotate_y                   = radar_object.uint2int_16(read_data[27]*256 + read_data[26])/Q7_DIVISOR
                     obj.vel_disamb_fac_valid       = (read_data[29]*256 + read_data[28])
