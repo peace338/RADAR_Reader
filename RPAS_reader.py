@@ -1004,10 +1004,10 @@ class App(QWidget):
         payload_len = data_length[1]*256+data_length[0]+1       # data length doesn't have end marker byte. so, we have to plus 1 byte to get the frame end marker
         data_payload = self.original_radar_file_handle.read(payload_len)
         data_payload_uint = np.frombuffer(data_payload,dtype=np.uint8)
-        # if data_payload_uint[payload_len-1] != 95 :
-        #     self.general_error_window("RADAR FILE ERROR","Frame end marker is missing.")
-        #     self.error_flag = 1
-        #     return
+        if data_payload_uint[payload_len-1] != 95 :
+            self.general_error_window("RADAR FILE ERROR","Frame end marker is missing.")
+            self.error_flag = 1
+            return
         track_frame_number = data_payload_uint[3]*16777216+data_payload_uint[2]*65535+data_payload_uint[1]*256+data_payload_uint[0] # uint32 frame_number
         cpu_cycle_time = data_payload_uint[7]*16777216+data_payload_uint[6]*65535+data_payload_uint[5]*256+data_payload_uint[4] # uint32 timecpucycles
         num_object = data_payload_uint[11]*16777216+data_payload_uint[10]*65535+data_payload_uint[9]*256+data_payload_uint[8] # uint32 timecpucycles
