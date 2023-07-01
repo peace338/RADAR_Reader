@@ -628,7 +628,7 @@ class App(QWidget):
     #####################################################################################
     def folder_select_btn_event(self):
         tmp_file_name = self.file_path_line_edit.text()
-        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/AMR/rxgain30_txbackoff0_cfarThresh7", filter = "Radar Data Bin(*.rdb)")
+        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/AMR/발구지", filter = "Radar Data Bin(*.rdb)")
         self.no_video_flag = 0
         self.no_video2_flag = 0
         self.no_simulation_data_flag = 0
@@ -1058,10 +1058,10 @@ class App(QWidget):
                     obj.range                      = radar_object.uint2int_16(read_data[ 5]*256 + read_data[ 4])/Q7_DIVISOR
                     obj.speed                      = radar_object.uint2int_16(read_data[ 7]*256 + read_data[ 6])/Q7_DIVISOR
                     obj.sin_azim                   = radar_object.uint2int_16(read_data[ 9]*256 + read_data[ 8])/Q14_DIVISOR
-                    obj.peak_val                   = (read_data[11]*256 + read_data[10])/Q8_DIVISOR
-                    obj.range_snr_db               = (read_data[13]*256 + read_data[12])/Q8_DIVISOR
-                    obj.doppler_snr_db             = (read_data[15]*256 + read_data[14])/Q8_DIVISOR
-                    obj.sin_azim_srn_lin           = (read_data[17]*256 + read_data[16])/Q8_DIVISOR
+                    obj.peak_val                   = (read_data[11]*256 + read_data[10])/Q8_DIVISOR * 6
+                    obj.range_snr_db               = (read_data[13]*256 + read_data[12])/Q8_DIVISOR * 6
+                    obj.doppler_snr_db             = (read_data[15]*256 + read_data[14])/Q8_DIVISOR * 6
+                    obj.sin_azim_srn_lin           = (read_data[17]*256 + read_data[16])/Q8_DIVISOR * 6
                     obj.x                          = radar_object.uint2int_16(read_data[19]*256 + read_data[18])/Q7_DIVISOR
                     obj.y                          = radar_object.uint2int_16(read_data[21]*256 + read_data[20])/Q7_DIVISOR
                     obj.z                          = (read_data[23]*256 + read_data[22])
@@ -1149,9 +1149,9 @@ class App(QWidget):
                         obj.speed                       = radar_object.uint2int_16((read_data[11]*256 + read_data[10]))/Q7_DIVISOR
                         obj.sinAzim                     = radar_object.uint2int_16((read_data[13]*256 + read_data[12]))/Q14_DIVISOR
                         obj.rangeVal                    = radar_object.uint2int_16((read_data[15]*256 + read_data[14]))/Q7_DIVISOR
-                        obj.rangeSNR                    = (read_data[17]*256 + read_data[16])/Q8_DIVISOR
-                        obj.dopplerSNR                  = (read_data[19]*256 + read_data[18])/Q8_DIVISOR
-                        obj.angleSNR                    = (read_data[21]*256 + read_data[20])/Q8_DIVISOR
+                        obj.rangeSNR                    = (read_data[17]*256 + read_data[16])/Q8_DIVISOR * 6
+                        obj.dopplerSNR                  = (read_data[19]*256 + read_data[18])/Q8_DIVISOR* 6
+                        obj.angleSNR                    = (read_data[21]*256 + read_data[20])/Q8_DIVISOR* 6
                         obj.x                           = radar_object.uint2int_16((read_data[23]*256 + read_data[22]))/Q7_DIVISOR
                         obj.y                           = radar_object.uint2int_16((read_data[25]*256 + read_data[24]))/Q7_DIVISOR
                         obj.velDisambFacValid           = (read_data[27]*256 + read_data[26])
@@ -1201,19 +1201,21 @@ class App(QWidget):
 
         for ii in range(len(obj)) :
             # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : BRUSH[(obj[ii].z % len(BRUSH))], 'data': 1})
+            # print(obj[ii].range_snr_db)
+            # if (obj[ii].range_snr_db < 22.0) and obj[ii].range < 0.6 :
+            #     continue
             obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
         for ii in range(len(trk)) :
             # tmp = QRect(10,15,20,25)
+            if 1:
+                continue
             self.trk_rects.append(self.make_boxes(trk[ii].x, trk[ii].y,  trk[ii].x_size + 0.2,  trk[ii].y_size + 0.2, [255,0,255]))
             # trk_spots.append({'pos':[trk[ii].x, trk[ii].y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
             #                                 'pen' : (255, 0, 255, 255), 'brush' : (0, 0, 0, 0)})
             #  'sourceRect' : (trk[ii].x, trk[ii].y, 11,30)
         
         self.original_scatter.clear()
-        # pdb.set_trace()
-        # print(type(tmp))
-        # self.original_scatter.addPoints(tmp)
-        # self.original_radar_plot,
+
         self.plot_boxes(self.original_radar_plot, self.trk_rects)
         if self.original_object_checkbox.isChecked() :
             self.original_scatter.addPoints(obj_spots)
