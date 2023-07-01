@@ -148,7 +148,7 @@ class App(QWidget):
         self.simulated_object_list = []
         self.simulated_track_list = []
         self.can_data = []
-
+        self.trk_rects = []
 
         self.setWindowTitle('BSD Developement Tool')
         self.setFixedSize(window_size[0],window_size[1])
@@ -590,6 +590,36 @@ class App(QWidget):
 
     ########################################## GUI Drawing End ####################################
 
+
+
+
+
+
+    ########################################## Box Draw Example ###################################
+        # rects = []
+        # rects.append(self.make_boxes(0, 0, 3, 5, 'r'))
+        # rects.append(self.make_boxes(5, 0, 3, 5, [0,255,255]))
+        # rects.append(self.make_boxes(-5, 0, 3, 5,'g'))
+        # rects.append(self.make_boxes(0, 10, 3, 5,'y'))
+        # rects.append(self.make_boxes(0, -10, 3, 5,[255,255,255]))
+        
+        # self.plot_boxes(self.original_radar_plot, rects)    
+        # self.remove_boxes(self.original_radar_plot, rects)  #use this function to romove boxes
+    
+    def make_boxes(self,x_center,y_center,x_width,y_width, linecolor):
+        rect_item = RectItem(QRectF(x_center-x_width*.5, y_center-y_width*.5, x_width, y_width),linecolor)
+        return rect_item
+
+    def plot_boxes(self, plot, rect_list):
+        for ii in rect_list:
+            plot.addItem(ii)
+    
+    def remove_boxes(self, plot, rect_list):
+        for ii in rect_list:
+            plot.removeItem(ii)
+
+
+            
 
 
 
@@ -1053,8 +1083,8 @@ class App(QWidget):
                     trk.y                          = radar_object.uint2int_16((read_data[ 5]*256 + read_data[ 4]))/Q7_DIVISOR
                     trk.xd                         = radar_object.uint2int_16((read_data[ 7]*256 + read_data[ 6]))/Q7_DIVISOR
                     trk.yd                         = radar_object.uint2int_16((read_data[ 9]*256 + read_data[ 8]))/Q7_DIVISOR
-                    trk.x_size                     = (read_data[11]*256 + read_data[10])
-                    trk.y_size                     = (read_data[13]*256 + read_data[12])
+                    trk.x_size                     = (read_data[11]*256 + read_data[10])/Q7_DIVISOR * 2
+                    trk.y_size                     = (read_data[13]*256 + read_data[12])/Q7_DIVISOR * 2
                     trk.tick                       = (read_data[15]*256 + read_data[14])
                     trk.age                        = (read_data[17]*256 + read_data[16])
                     trk.flag                       = (read_data[19]*256 + read_data[18])
@@ -1165,19 +1195,26 @@ class App(QWidget):
     def original_graph_update(self, obj, trk) :
         obj_spots=[]
         trk_spots=[]
+        
+        self.remove_boxes(self.original_radar_plot, self.trk_rects)
+        self.trk_rects=[]
+
         for ii in range(len(obj)) :
             # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : BRUSH[(obj[ii].z % len(BRUSH))], 'data': 1})
             obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
         for ii in range(len(trk)) :
             # tmp = QRect(10,15,20,25)
-            trk_spots.append({'pos':[trk[ii].x, trk[ii].y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
-                                            'pen' : (255, 0, 255, 255), 'brush' : (0, 0, 0, 0)})
+            self.trk_rects.append(self.make_boxes(trk[ii].x, trk[ii].y,  trk[ii].x_size + 0.2,  trk[ii].y_size + 0.2, [255,0,255]))
+            # trk_spots.append({'pos':[trk[ii].x, trk[ii].y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
+            #                                 'pen' : (255, 0, 255, 255), 'brush' : (0, 0, 0, 0)})
             #  'sourceRect' : (trk[ii].x, trk[ii].y, 11,30)
         
         self.original_scatter.clear()
         # pdb.set_trace()
         # print(type(tmp))
         # self.original_scatter.addPoints(tmp)
+        # self.original_radar_plot,
+        self.plot_boxes(self.original_radar_plot, self.trk_rects)
         if self.original_object_checkbox.isChecked() :
             self.original_scatter.addPoints(obj_spots)
         if self.original_track_checkbox.isChecked() :
@@ -1458,7 +1495,29 @@ class playing_thread(QThread) :
                 self.parent.play_btn.clicked.emit()
                 break
 
+class RectItem(pg.GraphicsObject):
+    def __init__(self, rect, colormap, parent=None):
+        super().__init__(parent)
+        self._rect = rect
+        self._colormap = colormap
+        self.picture = QPicture()
+        self._generate_picture()
 
+    @property
+    def rect(self):
+        return self._rect
+
+    def _generate_picture(self):
+        painter = QPainter(self.picture)
+        painter.setPen(pg.mkPen(self._colormap))
+        painter.drawRect(self.rect)
+        painter.end()
+
+    def paint(self, painter, option, widget=None):
+        painter.drawPicture(0, 0, self.picture)
+
+    def boundingRect(self):
+        return QRectF(self.picture.boundingRect())
 
 ###################################### End of Class Declaration ############################################
     
