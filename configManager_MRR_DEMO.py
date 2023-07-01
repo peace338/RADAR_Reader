@@ -184,9 +184,9 @@ class clusterCfgMRR(config):
 		minPointsInCluster = 1
 	dBScanNeighbourLim = 4
 
-	ellipsoidA = 3.0				# X축: (2.0) --> 3.0
-	ellipsoidB = 1.5				# Y축: (1.0) --> 1.5
-	ellipsoidC = 3.0				# 속도: (3.0)
+	ellipsoidA = 0.5				# X축: (2.0) --> 3.0
+	ellipsoidB = 0.5				# Y축: (1.0) --> 1.5
+	ellipsoidC = 1.0				# 속도: (3.0)
 
 
 class clusterCfgSEW(config):
@@ -198,9 +198,9 @@ class clusterCfgSEW(config):
 		minPointsInCluster = 1
 	dBScanNeighbourLim = 4
 
-	ellipsoidA = 2.0				# X축: (2.0)
-	ellipsoidB = 2.0				# Y축: (2.0)
-	ellipsoidC = 4.0				# 속도: (4.0)
+	ellipsoidA = 0.5				# X축: (2.0)
+	ellipsoidB = 0.5				# Y축: (2.0)
+	ellipsoidC = 1.0				# 속도: (4.0)
 
 
 class clusterCfgRCCW(config):
@@ -212,9 +212,9 @@ class clusterCfgRCCW(config):
 		minPointsInCluster = 1
 	dBScanNeighbourLim = 4
 
-	ellipsoidA = 3.0				# X축: (3.0)
-	ellipsoidB = 3.0				# Y축: (3.0)
-	ellipsoidC = 3.0				# 속도: (3.0)
+	ellipsoidA =  0.5				# X축: (3.0)
+	ellipsoidB =  0.5				# Y축: (3.0)
+	ellipsoidC =  1.0				# 속도: (3.0)
 
 
 class clusterCfgGuardRail(config):
@@ -222,9 +222,9 @@ class clusterCfgGuardRail(config):
 	maxCluster = 50
 	minPointsInCluster = 1
 
-	ellipsoidA = 4.0				# X축: (4.0)
-	ellipsoidB = 0.5				# Y축: (0.5)
-	ellipsoidC = 100.0				# 속도: (100.0)
+	ellipsoidA =  0.5				# X축: (4.0)
+	ellipsoidB =  0.5				# Y축: (0.5)
+	ellipsoidC =  1.0				# 속도: (100.0)
 
 
 class rangeBasedPruningCfg():
@@ -250,10 +250,10 @@ class trackingCfg(config, rangeBasedPruningCfg):
 	maxTracker = 50					# (30) --> 50
 
 	associateGamma = 16.5 	# 정확도 90%				# (16.5)
-	rangeAssocThresh = 3.0  # unit m					# (3.0)
-	velAssocThresh = 1.5  # unit m/s					# (1.5)
-	xAssocThresh = 3.0									# (3.0)
-	yAssocThresh = 2.0  								# (2.0)
+	rangeAssocThresh = 0.5  # unit m					# (3.0)
+	velAssocThresh = 1.0  # unit m/s					# (1.5)
+	xAssocThresh = 0.5									# (3.0)
+	yAssocThresh = 0.5  								# (2.0)
 	azimAssocThresh = np.sin(20 * np.pi / 180)			# (20)
 
 #	distAssocThreshSq = 1.65  	# unit m^2, original Value

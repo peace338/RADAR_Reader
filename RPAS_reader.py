@@ -14,14 +14,14 @@ import numpy as np                                  # python -m pip install nump
 import cv2                                          # python -m pip install opencv-python
 import pickle                                       # python -m pip install pickle
 import importlib
-
+import pdb
 #####################################################################################
 #   Constants - for User. User can modify the values freely                         #
 #####################################################################################
-GRAPH_MIN_X = -25           # (-20)
-GRAPH_MAX_X = 25            # (20)
-GRAPH_MIN_Y = 30
-GRAPH_MAX_Y = 0
+GRAPH_MIN_X = -10           # (-20)
+GRAPH_MAX_X = 10            # (20)
+GRAPH_MIN_Y = 0
+GRAPH_MAX_Y = 12.5
 VIDEO_FLIP_DEFAULT = True
 RADAR1_UPDOWN_FLIP = False
 RADAR2_UPDOWN_FLIP = True
@@ -42,7 +42,8 @@ SIMULATED_TRACK_ATTRIBUTES_LIST = ["ID","SNR","age","associ_ID","dopplerSNR",\
                                     "rangeSNR","tick","xSize","ySize","plotValidity",\
                                     "Status_Flag0","Status_Flag1"]
 
-
+BRUSH = [(255,255,255,255), (0,255,255,255), (255,0,255,255), (255,255,125,255), (255,125,255,255), (125,255,255,255), \
+         (125,0,255,255), (125,255,0,255), (255,125,0,255), (0,125,255,255), (0,255,125,255), (255,0,125,255)]
 #####################################################################################
 #   Class ==> Object and Track                                                      #
 #####################################################################################
@@ -480,11 +481,11 @@ class App(QWidget):
 
     # Graph Frame Contents
         self.original_radar_widget = QWidget(self.graph_frame)
-        self.original_radar_widget.setFixedSize(350,690)
+        self.original_radar_widget.setFixedSize(690,350)
         self.original_radar_widget.move(10, 20)
         self.simulated_radar_widget = QWidget(self.graph_frame)
-        self.simulated_radar_widget.setFixedSize(350,690)
-        self.simulated_radar_widget.move(360, 20)
+        self.simulated_radar_widget.setFixedSize(690,350)
+        self.simulated_radar_widget.move(10, 370)
         self.original_graph_label = QLabel(self.graph_frame)
         self.original_graph_label.move(20,5)
         self.original_graph_label.setText("Original Data")
@@ -492,7 +493,7 @@ class App(QWidget):
         self.graph_font.setBold(True)
         self.original_graph_label.setFont(self.graph_font)
         self.simulated_graph_label = QLabel(self.graph_frame)
-        self.simulated_graph_label.move(370,5)
+        self.simulated_graph_label.move(20,360)
         self.simulated_graph_label.setText("Simulated Data")
         self.simulated_graph_label.setFont(self.graph_font)
 
@@ -523,8 +524,8 @@ class App(QWidget):
         self.simulated_radar_plot.plotItem.showGrid(True, True, 0.5)
         
 
-        self.original_scatter = pg.ScatterPlotItem(size=3, brush=pg.mkBrush(255, 255, 255, 255))
-        self.simulated_scatter = pg.ScatterPlotItem(size=3, brush=pg.mkBrush(255, 255, 255, 255))
+        self.original_scatter = pg.ScatterPlotItem(size=1, brush=pg.mkBrush(255, 255, 255, 255))
+        self.simulated_scatter = pg.ScatterPlotItem(size=1, brush=pg.mkBrush(255, 255, 255, 255))
         self.original_scatter.setSize(7)
         self.simulated_scatter.setSize(7)
         self.original_scatter.sigClicked.connect(self.read_points)
@@ -597,7 +598,7 @@ class App(QWidget):
     #####################################################################################
     def folder_select_btn_event(self):
         tmp_file_name = self.file_path_line_edit.text()
-        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/KIA_BSD/20230327_BCW", filter = "Radar Data Bin(*.rdb)")
+        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/AMR/rxgain30_txbackoff0_cfarThresh7", filter = "Radar Data Bin(*.rdb)")
         self.no_video_flag = 0
         self.no_video2_flag = 0
         self.no_simulation_data_flag = 0
@@ -1003,10 +1004,10 @@ class App(QWidget):
         payload_len = data_length[1]*256+data_length[0]+1       # data length doesn't have end marker byte. so, we have to plus 1 byte to get the frame end marker
         data_payload = self.original_radar_file_handle.read(payload_len)
         data_payload_uint = np.frombuffer(data_payload,dtype=np.uint8)
-        if data_payload_uint[payload_len-1] != 95 :
-            self.general_error_window("RADAR FILE ERROR","Frame end marker is missing.")
-            self.error_flag = 1
-            return
+        # if data_payload_uint[payload_len-1] != 95 :
+        #     self.general_error_window("RADAR FILE ERROR","Frame end marker is missing.")
+        #     self.error_flag = 1
+        #     return
         track_frame_number = data_payload_uint[3]*16777216+data_payload_uint[2]*65535+data_payload_uint[1]*256+data_payload_uint[0] # uint32 frame_number
         cpu_cycle_time = data_payload_uint[7]*16777216+data_payload_uint[6]*65535+data_payload_uint[5]*256+data_payload_uint[4] # uint32 timecpucycles
         num_object = data_payload_uint[11]*16777216+data_payload_uint[10]*65535+data_payload_uint[9]*256+data_payload_uint[8] # uint32 timecpucycles
@@ -1165,14 +1166,23 @@ class App(QWidget):
         obj_spots=[]
         trk_spots=[]
         for ii in range(len(obj)) :
-            obj_spots.append({'pos':[obj[ii].x, obj[ii].y],'data': 1})
+            # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : BRUSH[(obj[ii].z % len(BRUSH))], 'data': 1})
+            obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
         for ii in range(len(trk)) :
-            trk_spots.append({'pos':[trk[ii].x, trk[ii].y],'data': 2})
+            # tmp = QRect(10,15,20,25)
+            trk_spots.append({'pos':[trk[ii].x, trk[ii].y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
+                                            'pen' : (255, 0, 255, 255), 'brush' : (0, 0, 0, 0)})
+            #  'sourceRect' : (trk[ii].x, trk[ii].y, 11,30)
+        
         self.original_scatter.clear()
+        # pdb.set_trace()
+        # print(type(tmp))
+        # self.original_scatter.addPoints(tmp)
         if self.original_object_checkbox.isChecked() :
-            self.original_scatter.addPoints(obj_spots, brush=(255,0,0,255))
+            self.original_scatter.addPoints(obj_spots)
         if self.original_track_checkbox.isChecked() :
-            self.original_scatter.addPoints(trk_spots, brush=(255,255,255,255))
+            # print(trk_spots)
+            self.original_scatter.addPoints(trk_spots)
         # print(speed_num, speed_als_num, len(obj), speed_num/len(obj), speed_als_num/len(obj) )
     
     def simulated_graph_update(self, obj, trk) :
@@ -1180,10 +1190,11 @@ class App(QWidget):
         trk_spots=[]
         trk_candidate_spots=[]
         for ii in range(len(obj)) :
-            obj_spots.append({'pos':[obj[ii].x, obj[ii].y],'data': 1})
+            obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0,0,0, 0), 'brush' : BRUSH[(obj[ii].clusterId % len(BRUSH))], 'data': 1})
         for ii in range(len(trk)) :
             if trk[ii].plotValidity :
-                trk_spots.append({'pos':[trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y],'data': 2})
+                trk_spots.append({'pos':[trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
+                                            'pen' : (255,0,255, 255), 'brush' : (0,0,0,0)})
             else :
                 trk_candidate_spots.append({'pos':[trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y],'data': 2})
         self.simulated_scatter.clear()
@@ -1191,8 +1202,8 @@ class App(QWidget):
             self.simulated_scatter.addPoints(obj_spots, brush=(255,0,0,255))
         if self.simulated_track_checkbox.isChecked() :
             self.simulated_scatter.addPoints(trk_spots, brush=(255,255,255,255))
-        if self.simulated_candidate_checkbox.isChecked() :
-            self.simulated_scatter.addPoints(trk_candidate_spots, brush=(0,255,0,255))
+        # if self.simulated_candidate_checkbox.isChecked() :
+        #     self.simulated_scatter.addPoints(trk_candidate_spots, brush=(0,255,0,255))
         
 
     def enable_all_components(self, onoff) :
