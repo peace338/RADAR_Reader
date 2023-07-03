@@ -149,6 +149,7 @@ class App(QWidget):
         self.simulated_track_list = []
         self.can_data = []
         self.trk_rects = []
+        self.trk_rects_sim = []
 
         self.setWindowTitle('BSD Developement Tool')
         self.setFixedSize(window_size[0],window_size[1])
@@ -1209,9 +1210,9 @@ class App(QWidget):
             # tmp = QRect(10,15,20,25)
             if 1:
                 continue
-            self.trk_rects.append(self.make_boxes(trk[ii].x, trk[ii].y,  trk[ii].x_size + 0.2,  trk[ii].y_size + 0.2, [255,0,255]))
-            # trk_spots.append({'pos':[trk[ii].x, trk[ii].y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
-            #                                 'pen' : (255, 0, 255, 255), 'brush' : (0, 0, 0, 0)})
+            # self.trk_rects.append(self.make_boxes(trk[ii].x, trk[ii].y,  trk[ii].x_size + 0.2,  trk[ii].y_size + 0.2, [255,0,255]))
+            trk_spots.append({'pos':[trk[ii].x, trk[ii].y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
+                                            'pen' : (255, 0, 255, 255), 'brush' : (0, 0, 0, 0)})
             #  'sourceRect' : (trk[ii].x, trk[ii].y, 11,30)
         
         self.original_scatter.clear()
@@ -1227,16 +1228,23 @@ class App(QWidget):
     def simulated_graph_update(self, obj, trk) :
         obj_spots=[]
         trk_spots=[]
+        self.remove_boxes(self.simulated_radar_plot, self.trk_rects_sim)
+        self.trk_rects_sim=[]
+        
         trk_candidate_spots=[]
         for ii in range(len(obj)) :
             obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0,0,0, 0), 'brush' : BRUSH[(obj[ii].clusterId % len(BRUSH))], 'data': 1})
         for ii in range(len(trk)) :
             if trk[ii].plotValidity :
-                trk_spots.append({'pos':[trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
-                                            'pen' : (255,0,255, 255), 'brush' : (0,0,0,0)})
+                # trk_spots.append({'pos':[trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
+                #                             'pen' : (255,0,255, 255), 'brush' : (0,0,0,0)})
+                
+                self.trk_rects_sim.append(self.make_boxes(trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y,  trk[ii].xSize + 0.2,  trk[ii].ySize + 0.2, [255,0,255]))
             else :
                 trk_candidate_spots.append({'pos':[trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y],'data': 2})
+                
         self.simulated_scatter.clear()
+        self.plot_boxes(self.simulated_radar_plot, self.trk_rects_sim)
         if self.simulated_object_checkbox.isChecked() :
             self.simulated_scatter.addPoints(obj_spots, brush=(255,0,0,255))
         if self.simulated_track_checkbox.isChecked() :

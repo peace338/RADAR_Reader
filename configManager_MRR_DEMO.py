@@ -177,7 +177,7 @@ class clusterCfgUSRR:
 
 class clusterCfgMRR(config):
 	isGuardRail = False
-	maxCluster = 50				# (30)
+	maxCluster = 600				# (30)
 	if CONST.CLUSTER_MIN_POINT_MODIFY:
 		minPointsInCluster = 2					# (2)
 	else:
