@@ -629,7 +629,7 @@ class App(QWidget):
     #####################################################################################
     def folder_select_btn_event(self):
         tmp_file_name = self.file_path_line_edit.text()
-        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/AMR/발구지", filter = "Radar Data Bin(*.rdb)")
+        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/AMR/rxain36txback6peakVal3584after4m", filter = "Radar Data Bin(*.rdb)")
         self.no_video_flag = 0
         self.no_video2_flag = 0
         self.no_simulation_data_flag = 0
@@ -1204,15 +1204,29 @@ class App(QWidget):
             # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : BRUSH[(obj[ii].z % len(BRUSH))], 'data': 1})
             # print(obj[ii].range_snr_db)
             # if (obj[ii].range_snr_db < 22.0) and obj[ii].range < 0.6 :
-            #     continue
-            obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
+            # if (obj[ii].range_snr_db < 7.0):
+            if (obj[ii].peak_val < 0.0):
+                # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (255,0,255,255), 'data': 1})
+                continue
+            elif (obj[ii].range_snr_db < 7):
+                continue
+            elif (obj[ii].doppler_snr_db < 7):
+                # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,255,255), 'data': 1})
+                continue
+            elif (obj[ii].sin_azim_srn_lin < 7):
+                continue
+            elif (obj[ii].speed == 0) or (obj[ii].speed == -9.625):
+                obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,0,255,255), 'data': 1})
+
+            else:
+                obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
         for ii in range(len(trk)) :
             # tmp = QRect(10,15,20,25)
-            if 1:
-                continue
-            # self.trk_rects.append(self.make_boxes(trk[ii].x, trk[ii].y,  trk[ii].x_size + 0.2,  trk[ii].y_size + 0.2, [255,0,255]))
-            trk_spots.append({'pos':[trk[ii].x, trk[ii].y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
-                                            'pen' : (255, 0, 255, 255), 'brush' : (0, 0, 0, 0)})
+            # if 1:
+            #     continue
+            self.trk_rects.append(self.make_boxes(trk[ii].x, trk[ii].y,  trk[ii].x_size + 0.2,  trk[ii].y_size + 0.2, [255,125,0]))
+            # trk_spots.append({'pos':[trk[ii].x, trk[ii].y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
+            #                                 'pen' : (255, 0, 255, 255), 'brush' : (0, 0, 0, 0)})
             #  'sourceRect' : (trk[ii].x, trk[ii].y, 11,30)
         
         self.original_scatter.clear()
