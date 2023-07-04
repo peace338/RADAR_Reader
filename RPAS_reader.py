@@ -1205,17 +1205,17 @@ class App(QWidget):
             # print(obj[ii].range_snr_db)
             # if (obj[ii].range_snr_db < 22.0) and obj[ii].range < 0.6 :
             # if (obj[ii].range_snr_db < 7.0):
-            if (obj[ii].peak_val < 0.0):
+            if (obj[ii].peak_val < 0):
                 # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (255,0,255,255), 'data': 1})
                 continue
-            elif (obj[ii].range_snr_db < 7):
+            elif (obj[ii].range_snr_db < 14):
                 continue
-            elif (obj[ii].doppler_snr_db < 7):
+            elif (obj[ii].doppler_snr_db < 14):
                 # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,255,255), 'data': 1})
                 continue
             elif (obj[ii].sin_azim_srn_lin < 7):
                 continue
-            elif (obj[ii].speed == 0) or (obj[ii].speed == -9.625):
+            elif (obj[ii].doppler_idx == 0):
                 obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,0,255,255), 'data': 1})
 
             else:
