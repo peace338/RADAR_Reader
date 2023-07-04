@@ -18,7 +18,7 @@ def outlierDetection(objs):
         # print(idxs)
         for i, idx in enumerate(idxs):
             # print(idx)
-            if idx[1] > 32:
+            if idx[1] >= 32:
                 # pdb.set_trace()
                 idxs[i][1] = idx[1] -64
         # print(idxs)
@@ -28,9 +28,9 @@ def outlierDetection(objs):
         # print(idxs)
         for i, idx in enumerate(idxs):
             # print(idx)
-            if idx > 32:
+            if idx >= 32:
                 # pdb.set_trace()
-                idxs[i] = idx -64
+                idxs[i] = idx - 64
         print("Input : ",idxs)
         idxs = idxs.reshape(-1,1)
     
