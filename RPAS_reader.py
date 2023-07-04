@@ -16,6 +16,7 @@ import pickle                                       # python -m pip install pick
 import importlib
 import pdb
 import math
+from anomalyDetection import *
 #####################################################################################
 #   Constants - for User. User can modify the values freely                         #
 #####################################################################################
@@ -1200,52 +1201,39 @@ class App(QWidget):
                 ii=ii+16        # this is for CAN data
 
 
-    def original_graph_update(self, obj, trk, egoDopplerState) :
+    def original_graph_update(self, objs, trks) :
         obj_spots=[]
         trk_spots=[]
-        
+        obj_dopplerAzim = []
+        filteredObjs = []
+        for obj in objs :
+            filteredObjs.append([np.arcsin(obj.sin_azim)*180/np.pi, obj.speed, obj.doppler_idx])
+        if filteredObjs:
+            flags = outlierDetection(np.array(filteredObjs))
+        else:
+            flags = []
         self.remove_boxes(self.original_radar_plot, self.trk_rects)
         self.trk_rects=[]
-        scale = 1.0
-        for ii in range(len(obj)) :
-            # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : BRUSH[(obj[ii].z % len(BRUSH))], 'data': 1})
-            # print(obj[ii].range_snr_db)
-            # if (obj[ii].range_snr_db < 22.0) and obj[ii].range < 0.6 :
-            # if (obj[ii].range_snr_db < 7.0):
-            if (obj[ii].peak_val < 0):
-                # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (255,0,255,255), 'data': 1})
-                continue
-            elif (obj[ii].range_snr_db < 0):
-                continue
-            elif (obj[ii].doppler_snr_db < 0):
-                # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,255,255), 'data': 1})
-                continue
-            elif (obj[ii].sin_azim_srn_lin < 7):
-                continue
-            elif (obj[ii].doppler_idx > egoDopplerState[0]) or (obj[ii].doppler_idx < egoDopplerState[1]) if egoDopplerState[2] else (obj[ii].doppler_idx > egoDopplerState[0]) and (obj[ii].doppler_idx < egoDopplerState[1]):
-                # if obj[ii].range_idx in range(20):
-                #     if obj[ii].peak_val < 110.0:
-                #         continue
-                # elif obj[ii].range_idx in [80,81,82,83,84]:
-                #     if obj[ii].peak_val < 107.0:
-                #         continue
-                # else:
-                #     if (obj[ii].peak_val < 102):
-                #         continue
-                obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
 
+        for obj, flag in zip(objs, flags) :
+            if flag == 1:
+                obj_dopplerAzim.append({'pos':[np.arcsin(obj.sin_azim)*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
+                obj_spots.append({'pos':[obj.x, obj.y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
             else:
-                obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
-        for ii in range(len(trk)) :
+                obj_dopplerAzim.append({'pos':[np.arcsin(obj.sin_azim)*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
+                obj_spots.append({'pos':[obj.x, obj.y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
+        
+        for trk in trks :
             # tmp = QRect(10,15,20,25)
             # if 1:
             #     continue
-            self.trk_rects.append(self.make_boxes(trk[ii].x, trk[ii].y,  trk[ii].x_size + 0.2,  trk[ii].y_size + 0.2, [255,125,0]))
+            self.trk_rects.append(self.make_boxes(trk.x, trk.y,  trk.x_size + 0.2,  trk.y_size + 0.2, [255,125,0]))
             # trk_spots.append({'pos':[trk[ii].x, trk[ii].y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
             #                                 'pen' : (255, 0, 255, 255), 'brush' : (0, 0, 0, 0)})
             #  'sourceRect' : (trk[ii].x, trk[ii].y, 11,30)
         
         self.original_scatter.clear()
+        self.simulated_scatter.clear()
 
         self.plot_boxes(self.original_radar_plot, self.trk_rects)
         if self.original_object_checkbox.isChecked() :
@@ -1253,93 +1241,10 @@ class App(QWidget):
         if self.original_track_checkbox.isChecked() :
             # print(trk_spots)
             self.original_scatter.addPoints(trk_spots)
-        # print(speed_num, speed_als_num, len(obj), speed_num/len(obj), speed_als_num/len(obj) )
-    def removeOutlier(self, objs, DopplerState):
-        if DopplerState[2]:
-            objs_removed = [x for x in objs if ((x[2]> DopplerState[0]) or (x[2] < DopplerState[1]))]
-        else:
-            objs_removed = [x for x in objs if ((x[2] > DopplerState[0]) and (x[2] < DopplerState[1]))]
-        return objs_removed
-    def getEgoState(self, objs):
-        # print(objs)
-
-        numDopplerBin = 64
-        scale = 1.0
-        egoDopplerIdx = np.mean(objs, axis=0)[2]
-        egoDopplerIdxStd = np.std(objs, axis = 0)[2]
-        print("egoDopplerIdx", egoDopplerIdx)
-        print("egoDopplerIdxStd", egoDopplerIdxStd)
-        if len(objs) == 0:
-            egoDopplerIdx = 0
-            egoDopplerIdxStd = 0.5
-        
-        maxDopplerBin = egoDopplerIdx + egoDopplerIdxStd* scale
-        maxDopplerBin = maxDopplerBin if maxDopplerBin < numDopplerBin else maxDopplerBin - numDopplerBin
-
-        minDopplerBin = egoDopplerIdx - egoDopplerIdxStd* scale
-        minDopplerBin = minDopplerBin if minDopplerBin > 0 else maxDopplerBin + numDopplerBin
-
-        DopplerState = (minDopplerBin, maxDopplerBin, 0) if minDopplerBin < maxDopplerBin else (minDopplerBin, maxDopplerBin, 1)
-        
-        if len(objs) != 0:
-            self.removeOutlier()
-        return DopplerState
-        
-    def egomotion_graph_update(self, obj, trk) :
-        obj_spots=[]
-        trk_spots=[]
-        ego_objs = []
-        scale = 1.0
-        for ii in range(len(obj)) :
-            if (obj[ii].doppler_idx == 0):
-                if obj[ii].range_idx in range(20):
-                    if obj[ii].peak_val < 110.0:
-                        continue
-                elif obj[ii].range_idx in [80,81,82,83,84]:
-                    if obj[ii].peak_val < 110.0:
-                        continue
-                else:
-                    if (obj[ii].peak_val < 102):
-                        continue
-            if (abs(obj[ii].speed) > 1.5):
-                continue
-            ego_objs.append([np.arcsin(obj[ii].sin_azim)*180/np.pi, obj[ii].speed, obj[ii].doppler_idx])
-
-        egoDopplerState = self.getEgoState(np.array(ego_objs))
-
-
-        for ii in range(len(obj)) :
-            if (obj[ii].doppler_idx > egoDopplerState[0]) or (obj[ii].doppler_idx < egoDopplerState[1]) if egoDopplerState[2] else (obj[ii].doppler_idx > egoDopplerState[0]) and (obj[ii].doppler_idx < egoDopplerState[1]):
-            # if (obj[ii].doppler_idx == 0):
-            #     if obj[ii].range_idx in range(20):
-            #         if obj[ii].peak_val < 110.0:
-            #             continue
-            #     elif obj[ii].range_idx in [80,81,82,83,84]:
-            #         if obj[ii].peak_val < 110.0:
-            #             continue
-            #     else:
-            #         if (obj[ii].peak_val < 102):
-                obj_spots.append({'pos':[np.arcsin(obj[ii].sin_azim)*180/np.pi, obj[ii].speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
-            else:
-                obj_spots.append({'pos':[np.arcsin(obj[ii].sin_azim)*180/np.pi, obj[ii].speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
-        # for ii in range(len(trk)) :
-        #     # tmp = QRect(10,15,20,25)
-        #     # if 1:
-        #     #     continue
-        #     self.trk_rects.append(self.make_boxes(trk[ii].x, trk[ii].y,  trk[ii].x_size + 0.2,  trk[ii].y_size + 0.2, [255,125,0]))
-        #     # trk_spots.append({'pos':[trk[ii].x, trk[ii].y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
-        #     #                                 'pen' : (255, 0, 255, 255), 'brush' : (0, 0, 0, 0)})
-        #     #  'sourceRect' : (trk[ii].x, trk[ii].y, 11,30)
-        
-        self.simulated_scatter.clear()
-
         if self.simulated_object_checkbox.isChecked() :
-            self.simulated_scatter.addPoints(obj_spots)
-        if self.simulated_track_checkbox.isChecked() :
-            # print(trk_spots)
-            self.simulated_scatter.addPoints(trk_spots)
+            self.simulated_scatter.addPoints(obj_dopplerAzim)
         # print(speed_num, speed_als_num, len(obj), speed_num/len(obj), speed_als_num/len(obj) )
-        return egoDopplerState
+        
     def simulated_graph_update(self, obj, trk) :
         obj_spots=[]
         trk_spots=[]
@@ -1510,8 +1415,8 @@ class App(QWidget):
     def frame_update(self) :
         self.componenet_update()
         self.get_original_radar_data_in_frame(self.radar_current_frame_num, IT_IS_NOT_SIMULATION, 0)       # simulation_flag = 0, radar_num = 0
-        egoDopplerState = self.egomotion_graph_update(self.original_object_list, self.original_track_list)
-        self.original_graph_update(self.original_object_list, self.original_track_list, egoDopplerState)
+        # egoDopplerState = self.egomotion_graph_update(self.original_object_list, self.original_track_list)
+        self.original_graph_update(self.original_object_list, self.original_track_list)
         
         # if self.no_simulation_data_flag == 0 :
         if 0 :
