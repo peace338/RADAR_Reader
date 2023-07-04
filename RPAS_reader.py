@@ -1208,9 +1208,9 @@ class App(QWidget):
             if (obj[ii].peak_val < 0):
                 # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (255,0,255,255), 'data': 1})
                 continue
-            elif (obj[ii].range_snr_db < 14):
+            elif (obj[ii].range_snr_db < 0):
                 continue
-            elif (obj[ii].doppler_snr_db < 14):
+            elif (obj[ii].doppler_snr_db < 0):
                 # obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,255,255), 'data': 1})
                 continue
             elif (obj[ii].sin_azim_srn_lin < 7):
