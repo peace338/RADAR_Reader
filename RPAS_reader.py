@@ -17,13 +17,14 @@ import importlib
 import pdb
 import math
 from anomalyDetection import *
+from drawHelper import *
 #####################################################################################
 #   Constants - for User. User can modify the values freely                         #
 #####################################################################################
-GRAPH_MIN_X = -10           # (-20)
-GRAPH_MAX_X = 10            # (20)
+GRAPH_MIN_X = -5           # (-20)
+GRAPH_MAX_X = 5           # (20)
 GRAPH_MIN_Y = 0
-GRAPH_MAX_Y = 12.5
+GRAPH_MAX_Y = 10
 
 EGO_GRAPH_MIN_X = -90           # (-20)
 EGO_GRAPH_MAX_X = 90           # (20)
@@ -185,18 +186,21 @@ class App(QWidget):
         self.control_frame.move(20,350)
         self.control_frame.setLineWidth(1)
         self.control_frame.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
+        # self.control_frame.setVisible(False)
 
         self.select_frame = QFrame(self)
         self.select_frame.setFixedSize(380, 120)
         self.select_frame.move(20,560)
         self.select_frame.setLineWidth(1)
         self.select_frame.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
+        self.select_frame.setVisible(False)
 
         self.simulation_frame = QFrame(self)
         self.simulation_frame.setFixedSize(380, 95)
         self.simulation_frame.move(20,685)
         self.simulation_frame.setLineWidth(1)
         self.simulation_frame.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
+        self.simulation_frame.setVisible(False)
 
         self.graph_frame = QFrame(self)
         self.graph_frame.setFixedSize(720, 720)
@@ -490,11 +494,12 @@ class App(QWidget):
 
     # Graph Frame Contents
         self.original_radar_widget = QWidget(self.graph_frame)
-        self.original_radar_widget.setFixedSize(690,350)
+        self.original_radar_widget.setFixedSize(690,700)
         self.original_radar_widget.move(10, 20)
         self.simulated_radar_widget = QWidget(self.graph_frame)
         self.simulated_radar_widget.setFixedSize(690,350)
         self.simulated_radar_widget.move(10, 370)
+        self.simulated_radar_widget.setVisible(False)
         self.original_graph_label = QLabel(self.graph_frame)
         self.original_graph_label.move(20,5)
         self.original_graph_label.setText("Original Data")
@@ -505,7 +510,7 @@ class App(QWidget):
         self.simulated_graph_label.move(20,360)
         self.simulated_graph_label.setText("Simulated Data")
         self.simulated_graph_label.setFont(self.graph_font)
-
+        self.simulated_graph_label.setVisible(False)
 
         self.original_radar_plot = pg.plot()
         self.simulated_radar_plot = pg.plot()
@@ -529,6 +534,12 @@ class App(QWidget):
         #########################################################################################
         self.original_radar_plot.setRange(QRectF(GRAPH_MIN_X, GRAPH_MIN_Y, GRAPH_MAX_X-GRAPH_MIN_X, GRAPH_MAX_Y-GRAPH_MIN_Y),disableAutoRange = True)
         self.original_radar_plot.plotItem.showGrid(True, True, 0.5)
+        self.original_radar_plot.setWindowTitle("Movon RADAR")
+        self.original_radar_plot.setLabel('left', 'y-axis (meter)')
+        self.original_radar_plot.setLabel('bottom', 'x-axis (meter)')
+        drawGridPolarCoord(self.original_radar_plot, 65)
+        # self.original_radar_plot.
+        self.original_radar_plot.addLegend()
         self.simulated_radar_plot.setRange(QRectF(EGO_GRAPH_MIN_X, EGO_GRAPH_MIN_Y, EGO_GRAPH_MAX_X-EGO_GRAPH_MIN_X, EGO_GRAPH_MAX_Y-EGO_GRAPH_MIN_Y),disableAutoRange = True)
         self.simulated_radar_plot.plotItem.showGrid(True, True, 0.5)
         
@@ -1207,7 +1218,7 @@ class App(QWidget):
         obj_dopplerAzim = []
         filteredObjs = []
         for obj in objs :
-            filteredObjs.append([np.arcsin(obj.sin_azim)*180/np.pi, obj.speed, obj.doppler_idx])
+            filteredObjs.append([np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed, obj.doppler_idx])
         if filteredObjs:
             flags = outlierDetection(np.array(filteredObjs))
         else:
@@ -1217,10 +1228,11 @@ class App(QWidget):
 
         for obj, flag in zip(objs, flags) :
             if flag == 1:
-                obj_dopplerAzim.append({'pos':[np.arcsin(obj.sin_azim)*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
+                # print(obj.sin_azim)
+                obj_dopplerAzim.append({'pos':[np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
                 obj_spots.append({'pos':[obj.x, obj.y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
             else:
-                obj_dopplerAzim.append({'pos':[np.arcsin(obj.sin_azim)*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
+                obj_dopplerAzim.append({'pos':[np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
                 obj_spots.append({'pos':[obj.x, obj.y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
         
         for trk in trks :
@@ -1418,10 +1430,6 @@ class App(QWidget):
         # egoDopplerState = self.egomotion_graph_update(self.original_object_list, self.original_track_list)
         self.original_graph_update(self.original_object_list, self.original_track_list)
         
-        # if self.no_simulation_data_flag == 0 :
-        if 0 :
-            self.get_simulated_radar_data_in_frame(self.radar_current_frame_num)
-            self.simulated_graph_update(self.simulated_object_list, self.simulated_track_list)
         if (self.video_current_frame_num >= self.video_end_frame_num) :
             self.update_video_frame(self.video_end_frame_num-1)
         elif (self.video_current_frame_num < 0) :

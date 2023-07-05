@@ -31,19 +31,19 @@ def outlierDetection(objs):
             if idx >= 32:
                 # pdb.set_trace()
                 idxs[i] = idx - 64
-        print("Input : ",idxs)
+        # print("Input : ",idxs)
         idxs = idxs.reshape(-1,1)
     
     if 1:
         
         clf = LocalOutlierFactor(n_neighbors=numNeighbor, algorithm = 'ball_tree', p =2, metric = 'minkowski')
         ret = clf.fit_predict(idxs)
-        print("n_neighbors_ :", clf.n_neighbors_)
-        print("negative_outlier_factor : ", clf.negative_outlier_factor_)
-        print("offset : ", clf.offset_)
-        print("out :", ret)
+        # print("n_neighbors_ :", clf.n_neighbors_)
+        # print("negative_outlier_factor : ", clf.negative_outlier_factor_)
+        # print("offset : ", clf.offset_)
+        # print("out :", ret)
         ret = [classifier(x) for x in clf.negative_outlier_factor_]
-        print(ret)
+        # print(ret)
     # elif 0:
     #     clf = OneClassSVM(kernel='linear', gamma='scale').fit(idxs)
     #     ret = clf.predict(idxs)
