@@ -21,8 +21,8 @@ from drawHelper import *
 #####################################################################################
 #   Constants - for User. User can modify the values freely                         #
 #####################################################################################
-GRAPH_MIN_X = -5           # (-20)
-GRAPH_MAX_X = 5           # (20)
+GRAPH_MIN_X = -10          # (-20)
+GRAPH_MAX_X = 10           # (20)
 GRAPH_MIN_Y = 0
 GRAPH_MAX_Y = 10
 
@@ -193,14 +193,14 @@ class App(QWidget):
         self.select_frame.move(20,560)
         self.select_frame.setLineWidth(1)
         self.select_frame.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
-        self.select_frame.setVisible(False)
+        self.select_frame.setVisible(True)
 
         self.simulation_frame = QFrame(self)
         self.simulation_frame.setFixedSize(380, 95)
         self.simulation_frame.move(20,685)
         self.simulation_frame.setLineWidth(1)
         self.simulation_frame.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
-        self.simulation_frame.setVisible(False)
+        self.simulation_frame.setVisible(True)
 
         self.graph_frame = QFrame(self)
         self.graph_frame.setFixedSize(720, 720)
@@ -494,12 +494,12 @@ class App(QWidget):
 
     # Graph Frame Contents
         self.original_radar_widget = QWidget(self.graph_frame)
-        self.original_radar_widget.setFixedSize(690,700)
+        self.original_radar_widget.setFixedSize(690,350)
         self.original_radar_widget.move(10, 20)
         self.simulated_radar_widget = QWidget(self.graph_frame)
         self.simulated_radar_widget.setFixedSize(690,350)
         self.simulated_radar_widget.move(10, 370)
-        self.simulated_radar_widget.setVisible(False)
+        self.simulated_radar_widget.setVisible(True)
         self.original_graph_label = QLabel(self.graph_frame)
         self.original_graph_label.move(20,5)
         self.original_graph_label.setText("Original Data")
@@ -510,7 +510,7 @@ class App(QWidget):
         self.simulated_graph_label.move(20,360)
         self.simulated_graph_label.setText("Simulated Data")
         self.simulated_graph_label.setFont(self.graph_font)
-        self.simulated_graph_label.setVisible(False)
+        self.simulated_graph_label.setVisible(True)
 
         self.original_radar_plot = pg.plot()
         self.simulated_radar_plot = pg.plot()
@@ -648,7 +648,7 @@ class App(QWidget):
     #####################################################################################
     def folder_select_btn_event(self):
         tmp_file_name = self.file_path_line_edit.text()
-        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/AMR/v002_test", filter = "Radar Data Bin(*.rdb)")
+        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/AMR/20230705_hmc_poc", filter = "Radar Data Bin(*.rdb)")
         self.no_video_flag = 0
         self.no_video2_flag = 0
         self.no_simulation_data_flag = 0
