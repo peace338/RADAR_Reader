@@ -134,7 +134,7 @@ class App(QWidget):
 #   Class - App ==> Drawing GUIs                                                    #
 #####################################################################################
     def initUI(self):
-        window_size = [1150, 800]
+        window_size = [1150 + 300, 800]
         dir_path = os.path.dirname(os.path.abspath(__file__))
         self.radar_file_name = []
         self.video_file_name = []
@@ -159,6 +159,7 @@ class App(QWidget):
         self.can_data = []
         self.trk_rects = []
         self.trk_rects_sim = []
+        self.line = 0
 
         self.setWindowTitle('BSD Developement Tool')
         self.setFixedSize(window_size[0],window_size[1])
@@ -203,7 +204,7 @@ class App(QWidget):
         self.simulation_frame.setVisible(True)
 
         self.graph_frame = QFrame(self)
-        self.graph_frame.setFixedSize(720, 720)
+        self.graph_frame.setFixedSize(1000, 720)
         self.graph_frame.move(410,60)
         self.graph_frame.setLineWidth(1)
         self.graph_frame.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
@@ -493,16 +494,30 @@ class App(QWidget):
 
 
     # Graph Frame Contents
+        self.develop_widget1 = QWidget(self.graph_frame)
+        self.develop_widget1.setFixedSize(280,350)
+        self.develop_widget1.move(700, 20)
+        self.develop_widget1.setVisible(True)
+
+        self.develop_widget2 = QWidget(self.graph_frame)
+        self.develop_widget2.setFixedSize(280,350)
+        self.develop_widget2.move(700, 370)
+        self.develop_widget2.setVisible(True)
+
         self.original_radar_widget = QWidget(self.graph_frame)
         self.original_radar_widget.setFixedSize(690,350)
         self.original_radar_widget.move(10, 20)
+        self.original_radar_widget.setVisible(True)
+
         self.simulated_radar_widget = QWidget(self.graph_frame)
         self.simulated_radar_widget.setFixedSize(690,350)
         self.simulated_radar_widget.move(10, 370)
         self.simulated_radar_widget.setVisible(True)
+
         self.original_graph_label = QLabel(self.graph_frame)
         self.original_graph_label.move(20,5)
         self.original_graph_label.setText("Original Data")
+
         self.graph_font = self.original_graph_label.font()
         self.graph_font.setBold(True)
         self.original_graph_label.setFont(self.graph_font)
@@ -514,6 +529,11 @@ class App(QWidget):
 
         self.original_radar_plot = pg.plot()
         self.simulated_radar_plot = pg.plot()
+        self.develop_plot1 = pg.plot()
+        self.develop_plot2 = pg.plot()
+        setPlot(self.develop_plot1)
+        setPlot(self.develop_plot2)
+
         original_radar_plot_menu_item = self.original_radar_plot.plotItem.vb.menu.actions()
         self.original_radar_plot.plotItem.vb.menu.removeAction(original_radar_plot_menu_item[3])
         simulated_radar_plot_menu_item = self.simulated_radar_plot.plotItem.vb.menu.actions()
@@ -538,14 +558,25 @@ class App(QWidget):
         self.original_radar_plot.setLabel('left', 'y-axis (meter)')
         self.original_radar_plot.setLabel('bottom', 'x-axis (meter)')
         drawGridPolarCoord(self.original_radar_plot, 65)
+        drawGridPolarCoord(self.simulated_radar_plot, 65)
+        self.simulated_radar_plot.setWindowTitle("Movon RADAR")
+        self.simulated_radar_plot.setLabel('left', 'y-axis (meter)')
+        self.simulated_radar_plot.setLabel('bottom', 'x-axis (meter)')
         # self.original_radar_plot.
         self.original_radar_plot.addLegend()
-        self.simulated_radar_plot.setRange(QRectF(EGO_GRAPH_MIN_X, EGO_GRAPH_MIN_Y, EGO_GRAPH_MAX_X-EGO_GRAPH_MIN_X, EGO_GRAPH_MAX_Y-EGO_GRAPH_MIN_Y),disableAutoRange = True)
+        if not self.simulated_object_checkbox.isChecked() :
+            self.simulated_radar_plot.setRange(QRectF(EGO_GRAPH_MIN_X, EGO_GRAPH_MIN_Y, EGO_GRAPH_MAX_X-EGO_GRAPH_MIN_X, EGO_GRAPH_MAX_Y-EGO_GRAPH_MIN_Y),disableAutoRange = True)
+        else:
+            self.simulated_radar_plot.setRange(QRectF(GRAPH_MIN_X, GRAPH_MIN_Y, GRAPH_MAX_X-GRAPH_MIN_X, GRAPH_MAX_Y-GRAPH_MIN_Y),disableAutoRange = True)
+
         self.simulated_radar_plot.plotItem.showGrid(True, True, 0.5)
         
 
         self.original_scatter = pg.ScatterPlotItem(size=1, brush=pg.mkBrush(255, 255, 255, 255))
         self.simulated_scatter = pg.ScatterPlotItem(size=1, brush=pg.mkBrush(255, 255, 255, 255))
+        self.develop_scatter1 = pg.ScatterPlotItem()
+        self.develop_scatter2 = pg.ScatterPlotItem()
+        # self.develop_plotItem = pg.PlotItem()
         self.original_scatter.setSize(7)
         self.simulated_scatter.setSize(7)
         self.original_scatter.sigClicked.connect(self.read_points)
@@ -555,15 +586,24 @@ class App(QWidget):
 
         self.original_radar_plot.addItem(self.original_scatter)
         self.simulated_radar_plot.addItem(self.simulated_scatter)
+        self.develop_plot1.addItem(self.develop_scatter1)
+        self.develop_plot2.addItem(self.develop_scatter2)
+        # self.develop_plot2.addItem(self.develop_plotItem)
 
         self.original_layout = QGridLayout()
         self.simulated_layout = QGridLayout()
+        self.develop_layout1 = QGridLayout()
+        self.develop_layout2 = QGridLayout()
 
         self.original_layout.addWidget(self.original_radar_plot)
         self.simulated_layout.addWidget(self.simulated_radar_plot)
+        self.develop_layout1.addWidget(self.develop_plot1)
+        self.develop_layout2.addWidget(self.develop_plot2)
 
         self.original_radar_widget.setLayout(self.original_layout)
         self.simulated_radar_widget.setLayout(self.simulated_layout)
+        self.develop_widget1.setLayout(self.develop_layout1)
+        self.develop_widget2.setLayout(self.develop_layout2)
 
         self.original_graph_info_window = QDialog(self)
         self.original_graph_info_window.setFixedSize(275, 550)
@@ -638,6 +678,11 @@ class App(QWidget):
         for ii in rect_list:
             plot.removeItem(ii)
 
+    def remove_curves(self, plot):
+        plot.removeItem(self.line)
+    def plot_curves(self, plot, x, y):
+        self.line = plot.plot(x, y)
+
 
             
 
@@ -704,7 +749,9 @@ class App(QWidget):
 
         self.original_scatter.clear()
         self.simulated_scatter.clear()
-
+        self.develop_scatter2.clear()
+        self.develop_scatter1.clear()
+        # self.develop_plotItem.clear()
         if self.file_name_load_flag == 0 :
             self.general_error_window("RADAR FILE ERROR","Radar Data File is NOT selected...")
         else : 
@@ -1246,36 +1293,54 @@ class App(QWidget):
         
         self.original_scatter.clear()
         self.simulated_scatter.clear()
-
+        self.develop_scatter1.clear()
         self.plot_boxes(self.original_radar_plot, self.trk_rects)
         if self.original_object_checkbox.isChecked() :
             self.original_scatter.addPoints(obj_spots)
         if self.original_track_checkbox.isChecked() :
             # print(trk_spots)
             self.original_scatter.addPoints(trk_spots)
-        if self.simulated_object_checkbox.isChecked() :
-            self.simulated_scatter.addPoints(obj_dopplerAzim)
-        # print(speed_num, speed_als_num, len(obj), speed_num/len(obj), speed_als_num/len(obj) )
         
-    def simulated_graph_update(self, obj, trk) :
+        # if self.simulated_object_checkbox.isChecked() :
+        self.develop_scatter1.addPoints(obj_dopplerAzim)
+        # print(speed_num, speed_als_num, len(obj), speed_num/len(obj), speed_als_num/len(obj) )
+    
+    def simulated_graph_update(self, objs, trks) :
         obj_spots=[]
         trk_spots=[]
+        filteredObjs = []
+        obj_dopplerAzim = []
+        for obj in objs :
+            filteredObjs.append([np.arcsin(getAzim(obj.sinAzim))*180/np.pi, obj.speed, obj.dopplerIdx])
+        if filteredObjs:
+            flags, line_x, line_y = ransac(np.array(filteredObjs))
+        else:
+            flags = []
+        # trk_candidate_spots=[]
+        for obj, flag in zip(objs, flags) :
+            if flag == 1:
+                # print(obj.sin_azim)
+                obj_dopplerAzim.append({'pos':[np.arcsin(getAzim(obj.sinAzim))*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
+                obj_spots.append({'pos':[obj.x, obj.y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
+            else:
+                obj_dopplerAzim.append({'pos':[np.arcsin(getAzim(obj.sinAzim))*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
+                obj_spots.append({'pos':[obj.x, obj.y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
+        
         self.remove_boxes(self.simulated_radar_plot, self.trk_rects_sim)
         self.trk_rects_sim=[]
         
-        trk_candidate_spots=[]
-        for ii in range(len(obj)) :
-            obj_spots.append({'pos':[obj[ii].x, obj[ii].y], 'size' : 5, 'pen' : (0,0,0, 0), 'brush' : BRUSH[(obj[ii].clusterId % len(BRUSH))], 'data': 1})
-        for ii in range(len(trk)) :
-            if trk[ii].plotValidity :
+        for trk in trks :
+            if trk.plotValidity :
                 # trk_spots.append({'pos':[trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
                 #                             'pen' : (255,0,255, 255), 'brush' : (0,0,0,0)})
                 
-                self.trk_rects_sim.append(self.make_boxes(trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y,  trk[ii].xSize + 0.2,  trk[ii].ySize + 0.2, [255,0,255]))
-            else :
-                trk_candidate_spots.append({'pos':[trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y],'data': 2})
+                self.trk_rects_sim.append(self.make_boxes(trk.statVecXYZ_x, trk.statVecXYZ_y,  trk.xSize*2 + 0.2,  trk.ySize*2 + 0.2, [255,0,255]))
+            # else :
+            #     trk_candidate_spots.append({'pos':[trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y],'data': 2})
                 
         self.simulated_scatter.clear()
+        self.develop_scatter2.clear()
+        # self.develop_plotItem.clear()
         self.plot_boxes(self.simulated_radar_plot, self.trk_rects_sim)
         if self.simulated_object_checkbox.isChecked() :
             self.simulated_scatter.addPoints(obj_spots, brush=(255,0,0,255))
@@ -1283,8 +1348,14 @@ class App(QWidget):
             self.simulated_scatter.addPoints(trk_spots, brush=(255,255,255,255))
         # if self.simulated_candidate_checkbox.isChecked() :
         #     self.simulated_scatter.addPoints(trk_candidate_spots, brush=(0,255,0,255))
-        
-
+        self.develop_scatter2.addPoints(obj_dopplerAzim)
+        if self.line != 0:
+            self.remove_curves(self.develop_plot2)
+        self.plot_curves(self.develop_plot2, line_x[:,0], line_y)
+        #     self.line.clear()
+        # self.line = self.develop_plot2.plot(line_x[:,0], line_y)
+        # print(line_x[:,0])
+        # self.develop_plotItem.addLine(pg.plot(x = line_x[:,0], y = line_y))
     def enable_all_components(self, onoff) :
         self.previous_frame_btn.setEnabled(onoff)
         self.play_btn.setEnabled(onoff)                   # under-construction
@@ -1429,7 +1500,9 @@ class App(QWidget):
         self.get_original_radar_data_in_frame(self.radar_current_frame_num, IT_IS_NOT_SIMULATION, 0)       # simulation_flag = 0, radar_num = 0
         # egoDopplerState = self.egomotion_graph_update(self.original_object_list, self.original_track_list)
         self.original_graph_update(self.original_object_list, self.original_track_list)
-        
+        if self.no_simulation_data_flag == 0 :
+            self.get_simulated_radar_data_in_frame(self.radar_current_frame_num)
+            self.simulated_graph_update(self.simulated_object_list, self.simulated_track_list)
         if (self.video_current_frame_num >= self.video_end_frame_num) :
             self.update_video_frame(self.video_end_frame_num-1)
         elif (self.video_current_frame_num < 0) :

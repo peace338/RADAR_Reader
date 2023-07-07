@@ -4314,7 +4314,7 @@ def findIDlistforDEBUG(cfarOutNDList, targetIdxPlotSpec):
 	return tmpDetIDList
 
 
-def conversion(object_list, RadarInfo, vehicle_speed, vehicle_steer_angle):
+def conversion(object_list, RadarInfo, vehicle_speed, vehicle_steer_angle, resList):
 	cfarOut3DList = []
 
 	mode = RadarInfo.mode
@@ -4328,7 +4328,9 @@ def conversion(object_list, RadarInfo, vehicle_speed, vehicle_steer_angle):
 		tmpObj.rangeIdx = obj.range_idx
 		tmpObj.dopplerIdx = obj.doppler_idx
 		tmpObj.range = obj.range
-		tmpObj.speed = obj.speed
+		# tmpObj.speed = obj.speed
+		dopplerIdx = obj.doppler_idx if obj.doppler_idx < 32 else (obj.doppler_idx - 64)
+		tmpObj.speed = resList[1] * dopplerIdx
 
 		if obj.sin_azim > 1:
 			obj.sin_azim = 1

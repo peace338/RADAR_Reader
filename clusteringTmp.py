@@ -299,7 +299,7 @@ def clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, RadarI
 				tempCluster.append(compObj)
 				neighCount += 1
 		else:
-			if (sumA < epsilon2WithSpeed) and (sumB < epsilon2WithSpeed):
+			if (sumA + sumB + sumC) < 1:
 				if compObj.scope:
 					continue
 				tempCluster.append(compObj)

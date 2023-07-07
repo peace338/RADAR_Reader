@@ -268,9 +268,9 @@ class trackingCfg(config, rangeBasedPruningCfg):
 	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=np.float)
 
 	CV_xVariance = 1.0			# (0.1) --> (1.0)
-	CV_yVariance = 4.0			# (4.0) --> (4.0)
-	CA_xVariance = 2.0			# (2.0) --> (2.0)
-	CA_yVariance = 1.0			# (0.1) --> (1.0)
+	CV_yVariance = 1.0			# (4.0) --> (4.0)
+	CA_xVariance = 3.0			# (2.0) --> (2.0)
+	CA_yVariance = 3.0			# (0.1) --> (1.0)
 
 	distanceLimit = 1.42 		# 정확도 30% (No Use)
 	multiplier = 2.5			# (No Use)

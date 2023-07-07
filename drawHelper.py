@@ -2,7 +2,11 @@
 import pyqtgraph as pg
 import numpy as np
 from pyqtgraph.Qt import QtGui, QtCore
-
+from PyQt6.QtCore import *
+GRAPH_MIN_X = -90          # (-20)
+GRAPH_MAX_X = 90           # (20)
+GRAPH_MIN_Y = -4.5
+GRAPH_MAX_Y = 4.5
 
 def drawGridPolarCoord(pyqtGraph):
     radius = np.linspace(0, 1, 5)  # 반지름 값
@@ -33,3 +37,9 @@ def getAzim(sinAzim):
     else:
         ret = sinAzim
     return ret
+
+def setPlot(pgplot):
+    pgplot.showGrid(True, True, 0.5)
+    pgplot.setLabel('left', 'speed(m/s)')
+    pgplot.setLabel('bottom', 'angle(Degree)')
+    pgplot.setRange(QRectF(GRAPH_MIN_X, GRAPH_MIN_Y, GRAPH_MAX_X-GRAPH_MIN_X, GRAPH_MAX_Y-GRAPH_MIN_Y),disableAutoRange = True)

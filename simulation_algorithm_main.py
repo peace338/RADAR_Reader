@@ -17,11 +17,13 @@ import trackMaker
 import importlib
 import prune_object
 import copy
+import pdb
 # import numpy as np
 
 reload_flag = 0
 
 def radar_algorithm_simulation(object_list, tracker, track_frame_number, can_data):
+    # pdb.set_trace()
     global reload_flag
     if reload_flag == 0:
         reload_modules()
@@ -36,13 +38,13 @@ def radar_algorithm_simulation(object_list, tracker, track_frame_number, can_dat
     #radar_track = DT.radar_trk()
 
     resList = domain.getResolution()  # unit : [meter, meter/sec, radian]
-
+    # pdb.set_trace()
     timeStamp = 0
 
     if track_frame_number == 275:
         aa = 1
 
-    RadarAngle = 45.0
+    RadarAngle = 0
     RadarInfo = DT.radar_info()
     RadarInfo.mode = can_data[4]		                              # 1 : BCW, 2 : RCCW, 3 : SEW
     RadarInfo.position = can_data[5]                                  # 1 : Left, 2 : Right
@@ -75,7 +77,7 @@ def radar_algorithm_simulation(object_list, tracker, track_frame_number, can_dat
 
     # ============================= Clustering =====================================
 #    print(track_frame_number)
-    Radar_raw_measurement = ml.conversion(object_list, RadarInfo, vehicle_speed, vehicle_steer_angle)  # conversion data type to suit to this simulation code
+    Radar_raw_measurement = ml.conversion(object_list, RadarInfo, vehicle_speed, vehicle_steer_angle, resList)  # conversion data type to suit to this simulation code
     # Pruning : Do Something(input : Radar_raw_measurement, output :cfarOut3DList)
     # Radar_raw_measurement = prune_object.remove_far_obj(Radar_raw_measurement)
     # Radar_raw_measurement = prune_object.remove_recede_obj(Radar_raw_measurement)
