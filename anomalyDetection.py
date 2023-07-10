@@ -13,18 +13,34 @@ def add_square_feature(X):
     # print(X.shape)
     return X
 
-def ransac(objs):
-    xDomian = np.arange(-90,90)[:, np.newaxis]
+def kernelTrick(X):
+    X = X * np.pi /180
+    X = np.concatenate([(-np.sin(X)).reshape(-1,1), (-np.cos(X)).reshape(-1,1)], axis=1)
+
+    return X
+
+def ransac_cos(objs):
+    xDomian = np.arange(-90,90,5)[:, np.newaxis]
     numNeighbor = math.ceil(len(objs) /2)
 
     idxs = objs[:,0:2]
-    # print(idxs)
-    for i, idx in enumerate(idxs):
-        # print(idx)
-        if idx[1] >= 32:
-            # pdb.set_trace()
-            idxs[i][1] = idx[1] -64
-    # print(idxs)
+
+
+    clf = RANSACRegressor(residual_threshold = 0.1, max_trials = 50)
+    clf.fit(kernelTrick(idxs[:,0].reshape(-1,1)), idxs[:,1])
+    # ret = clf.score(idxs[:,0].reshape(-1,1),idxs[:,1])
+    # ret = 
+
+    ret = [classifier2(x) for x in clf.inlier_mask_]
+    line_y = clf.predict(kernelTrick(xDomian))
+
+    return ret, xDomian, line_y
+
+def ransac(objs):
+    xDomian = np.arange(-90,90,5)[:, np.newaxis]
+    numNeighbor = math.ceil(len(objs) /2)
+
+    idxs = objs[:,0:2]
 
     clf = RANSACRegressor(residual_threshold = 0.16, max_trials = 50)
     clf.fit(add_square_feature(idxs[:,0].reshape(-1,1)), idxs[:,1])

@@ -159,7 +159,8 @@ class App(QWidget):
         self.can_data = []
         self.trk_rects = []
         self.trk_rects_sim = []
-        self.line = 0
+        self.line1 = 0
+        self.line2 = 0
 
         self.setWindowTitle('BSD Developement Tool')
         self.setFixedSize(window_size[0],window_size[1])
@@ -678,10 +679,13 @@ class App(QWidget):
         for ii in rect_list:
             plot.removeItem(ii)
 
-    def remove_curves(self, plot):
-        plot.removeItem(self.line)
+    def remove_curves(self, plot, line):
+        plot.removeItem(line)
+    
     def plot_curves(self, plot, x, y):
-        self.line = plot.plot(x, y)
+        line = plot.plot(x, y)
+
+        return line
 
 
             
@@ -1260,14 +1264,19 @@ class App(QWidget):
 
 
     def original_graph_update(self, objs, trks) :
+        ransacFlag = False
         obj_spots=[]
         trk_spots=[]
         obj_dopplerAzim = []
         filteredObjs = []
         for obj in objs :
             filteredObjs.append([np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed, obj.doppler_idx])
+        # if filteredObjs:
         if filteredObjs:
-            flags = outlierDetection(np.array(filteredObjs))
+            if not ransacFlag:
+                flags = outlierDetection(np.array(filteredObjs))
+            else:
+                flags, line_x, line_y = ransac(np.array(filteredObjs))
         else:
             flags = []
         self.remove_boxes(self.original_radar_plot, self.trk_rects)
@@ -1303,6 +1312,10 @@ class App(QWidget):
         
         # if self.simulated_object_checkbox.isChecked() :
         self.develop_scatter1.addPoints(obj_dopplerAzim)
+        if (ransacFlag):
+            if self.line1 != 0:
+                self.remove_curves(self.develop_plot1, self.line1)
+            self.line1 = self.plot_curves(self.develop_plot1, line_x[:,0], line_y)
         # print(speed_num, speed_als_num, len(obj), speed_num/len(obj), speed_als_num/len(obj) )
     
     def simulated_graph_update(self, objs, trks) :
@@ -1313,7 +1326,7 @@ class App(QWidget):
         for obj in objs :
             filteredObjs.append([np.arcsin(getAzim(obj.sinAzim))*180/np.pi, obj.speed, obj.dopplerIdx])
         if filteredObjs:
-            flags, line_x, line_y = ransac(np.array(filteredObjs))
+            flags, line_x, line_y = ransac_cos(np.array(filteredObjs))
         else:
             flags = []
         # trk_candidate_spots=[]
@@ -1349,9 +1362,9 @@ class App(QWidget):
         # if self.simulated_candidate_checkbox.isChecked() :
         #     self.simulated_scatter.addPoints(trk_candidate_spots, brush=(0,255,0,255))
         self.develop_scatter2.addPoints(obj_dopplerAzim)
-        if self.line != 0:
-            self.remove_curves(self.develop_plot2)
-        self.plot_curves(self.develop_plot2, line_x[:,0], line_y)
+        if self.line2 != 0:
+            self.remove_curves(self.develop_plot2, self.line2)
+        self.line2 = self.plot_curves(self.develop_plot2, line_x[:,0], line_y)
         #     self.line.clear()
         # self.line = self.develop_plot2.plot(line_x[:,0], line_y)
         # print(line_x[:,0])
