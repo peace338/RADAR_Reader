@@ -26,14 +26,17 @@ def ransac_cos(objs):
     idxs = objs[:,0:2]
 
 
-    clf = RANSACRegressor(residual_threshold = 0.1, max_trials = 50)
+    clf = RANSACRegressor(residual_threshold = 0.13, max_trials = 50)
     clf.fit(kernelTrick(idxs[:,0].reshape(-1,1)), idxs[:,1])
     # ret = clf.score(idxs[:,0].reshape(-1,1),idxs[:,1])
     # ret = 
 
     ret = [classifier2(x) for x in clf.inlier_mask_]
     line_y = clf.predict(kernelTrick(xDomian))
-
+    v_y = -1 * clf.predict(kernelTrick(np.array([[0]])))
+    v_x = -1 * clf.predict(kernelTrick(np.array([[90]])))
+    # print("n_feature : {}".format(clf.n_features_in_))
+    print("vx : {:.2f}m/s, vy : {:.2f}m/s".format(v_x[0], v_y[0]))
     return ret, xDomian, line_y
 
 def ransac(objs):
@@ -74,6 +77,7 @@ def outlierDetection(objs, idx = 2, LOF = -1.0):
 
     clf = LocalOutlierFactor(n_neighbors=numNeighbor, algorithm = 'ball_tree', p =2, metric = 'minkowski')
     ret = clf.fit_predict(idxs)
+    # print("n_feature : {}".format(clf.n_features_in_))
     # print("n_neighbors_ :", clf.n_neighbors_)
     # print("negative_outlier_factor : ", clf.negative_outlier_factor_)
     # print("offset : ", clf.offset_)
