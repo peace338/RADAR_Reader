@@ -1,7 +1,7 @@
 from sklearn.neighbors import LocalOutlierFactor # pip install scikit-learn
 from sklearn.svm import OneClassSVM
 from sklearn.ensemble import IsolationForest
-from sklearn.linear_model import RANSACRegressor
+from sklearn.linear_model import RANSACRegressor, LinearRegression
 import pdb
 import math
 import numpy as np
@@ -26,8 +26,12 @@ def ransac_cos(objs):
     idxs = objs[:,0:2]
 
 
-    clf = RANSACRegressor(residual_threshold = 0.13, max_trials = 50)
+    clf = RANSACRegressor(estimator=LinearRegression(fit_intercept=False, n_jobs=-1), residual_threshold = 0.13, max_trials = 50)
+    #if fit_intercept= False then fitting model is v(\theta) = - vx*sin(\theta) -vy*cos(\theta). if not the fitting model is v(\theta) = - vx*sin(\theta) -vy*cos(\theta) + c.
+    # print(clf.estimator_)
+    # clf.estimator_.get_params()
     clf.fit(kernelTrick(idxs[:,0].reshape(-1,1)), idxs[:,1])
+
     # ret = clf.score(idxs[:,0].reshape(-1,1),idxs[:,1])
     # ret = 
 
@@ -36,8 +40,9 @@ def ransac_cos(objs):
     v_y = -1 * clf.predict(kernelTrick(np.array([[0]])))
     v_x = -1 * clf.predict(kernelTrick(np.array([[90]])))
     # print("n_feature : {}".format(clf.n_features_in_))
-    print("vx : {:.2f}m/s, vy : {:.2f}m/s".format(v_x[0], v_y[0]))
-    return ret, xDomian, line_y
+    # print("vx : {:.2f}m/s, vy : {:.2f}m/s".format(clf.estimator_.coef_[0], clf.estimator_.coef_[1]))
+    
+    return ret, xDomian, line_y, clf.estimator_.coef_[0], clf.estimator_.coef_[1]
 
 def ransac(objs):
     xDomian = np.arange(-90,90,5)[:, np.newaxis]
@@ -45,7 +50,7 @@ def ransac(objs):
 
     idxs = objs[:,0:2]
 
-    clf = RANSACRegressor(residual_threshold = 0.16, max_trials = 50)
+    clf = RANSACRegressor(estimator=LinearRegression(n_jobs=-1), residual_threshold = 0.16, max_trials = 25)
     clf.fit(add_square_feature(idxs[:,0].reshape(-1,1)), idxs[:,1])
     # ret = clf.score(idxs[:,0].reshape(-1,1),idxs[:,1])
     # ret = 

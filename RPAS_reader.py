@@ -161,6 +161,7 @@ class App(QWidget):
         self.trk_rects_sim = []
         self.line1 = 0
         self.line2 = 0
+        self.velocity_text = 0
 
         self.setWindowTitle('BSD Developement Tool')
         self.setFixedSize(window_size[0],window_size[1])
@@ -356,7 +357,7 @@ class App(QWidget):
         self.view_control_widget = QWidget(self)
         self.view_control_widget.setFixedSize(380, 180)
 
-
+        # self.checkbox_tabwidget = QTabWidget(self.control_frame)
 
         # Add above control tabs to Tabwidget
         self.frame_control_tabwidget = QTabWidget(self.control_frame)
@@ -528,6 +529,8 @@ class App(QWidget):
         self.simulated_graph_label.setFont(self.graph_font)
         self.simulated_graph_label.setVisible(True)
 
+        self.vel_label = QLabel(self.graph_frame)
+        
         self.original_radar_plot = pg.plot()
         self.simulated_radar_plot = pg.plot()
         self.develop_plot1 = pg.plot()
@@ -1114,7 +1117,7 @@ class App(QWidget):
         num_object = data_payload_uint[11]*16777216+data_payload_uint[10]*65535+data_payload_uint[9]*256+data_payload_uint[8] # uint32 timecpucycles
         num_track = data_payload_uint[15]*16777216+data_payload_uint[14]*65535+data_payload_uint[13]*256+data_payload_uint[12] # uint32 timecpucycles
         sub_frame_num = data_payload_uint[19]*16777216+data_payload_uint[18]*65535+data_payload_uint[17]*256+data_payload_uint[16] # uint32 timecpucycles
-        print("FrameNumber : ", track_frame_number, "Detection point Number : ", num_object)
+        # print("FrameNumber : ", track_frame_number, "Detection point Number : ", num_object)
         ii=20
 
 
@@ -1173,7 +1176,7 @@ class App(QWidget):
                 vehicle_steer_angle -= 6553.5
             vehicle_steer_angle = vehicle_steer_angle * 38.0/650.0
 
-            print("CAN DATA : ",self.can_data, "Steering : ", round(vehicle_steer_angle, 1))
+            # print("CAN DATA : ",self.can_data, "Steering : ", round(vehicle_steer_angle, 1))
 
     def get_simulated_radar_data_in_frame(self, frame_index) :
         simulated_data_flag = 0
@@ -1326,7 +1329,15 @@ class App(QWidget):
         for obj in objs :
             filteredObjs.append([np.arcsin(getAzim(obj.sinAzim))*180/np.pi, obj.speed, obj.dopplerIdx])
         if filteredObjs:
-            flags, line_x, line_y = ransac_cos(np.array(filteredObjs))
+            flags, line_x, line_y, vx, vy = ransac_cos(np.array(filteredObjs))
+            print("vx : {:8.2f}m/s, vy : {:8.2f}m/s".format(vx, vy))
+            if self.velocity_text != 0:
+                self.develop_plot2.removeItem(self.velocity_text)
+            self.velocity_text = pg.TextItem(text = "vx : {:8.2f}m/s, vy : {:8.2f}m/s".format(vx, vy))
+            
+            self.develop_plot2.addItem(self.velocity_text)
+            self.velocity_text.setPos(-90,-4)
+            self.velocity_text
         else:
             flags = []
         # trk_candidate_spots=[]
