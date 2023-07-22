@@ -37,8 +37,8 @@ def ransac_cos(objs):
 
     ret = [classifier2(x) for x in clf.inlier_mask_]
     line_y = clf.predict(kernelTrick(xDomian))
-    v_y = -1 * clf.predict(kernelTrick(np.array([[0]])))
-    v_x = -1 * clf.predict(kernelTrick(np.array([[90]])))
+    # v_y = -1 * clf.predict(kernelTrick(np.array([[0]])))
+    # v_x = -1 * clf.predict(kernelTrick(np.array([[90]])))
     # print("n_feature : {}".format(clf.n_features_in_))
     # print("vx : {:.2f}m/s, vy : {:.2f}m/s".format(clf.estimator_.coef_[0], clf.estimator_.coef_[1]))
     
