@@ -1267,7 +1267,7 @@ class App(QWidget):
 
 
     def original_graph_update(self, objs, trks) :
-        ransacFlag = False
+        ransacFlag = True
         obj_spots=[]
         trk_spots=[]
         obj_dopplerAzim = []
@@ -1279,7 +1279,7 @@ class App(QWidget):
             if not ransacFlag:
                 flags = outlierDetection(np.array(filteredObjs))
             else:
-                flags, line_x, line_y = ransac(np.array(filteredObjs))
+                flags, line_x, line_y, vx, vy = ransac_cos(np.array(filteredObjs))
         else:
             flags = []
         self.remove_boxes(self.original_radar_plot, self.trk_rects)
