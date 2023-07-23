@@ -536,7 +536,7 @@ class App(QWidget):
         self.develop_plot1 = pg.plot()
         self.develop_plot2 = pg.plot()
         setPlot(self.develop_plot1)
-        setPlot(self.develop_plot2)
+        setPlot(self.develop_plot2, format = "YZ")
 
         original_radar_plot_menu_item = self.original_radar_plot.plotItem.vb.menu.actions()
         self.original_radar_plot.plotItem.vb.menu.removeAction(original_radar_plot_menu_item[3])
@@ -1272,6 +1272,7 @@ class App(QWidget):
         trk_spots=[]
         obj_dopplerAzim = []
         filteredObjs = []
+        obj_yz = []
         for obj in objs :
             filteredObjs.append([np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed, obj.doppler_idx])
         # if filteredObjs:
@@ -1289,8 +1290,11 @@ class App(QWidget):
             if flag == 1:
                 # print(obj.sin_azim)
                 obj_dopplerAzim.append({'pos':[np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
+
+                obj_yz.append({'pos':[obj.y, obj.z], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
                 obj_spots.append({'pos':[obj.x, obj.y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
             else:
+                obj_yz.append({'pos':[obj.y, obj.z], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
                 obj_dopplerAzim.append({'pos':[np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
                 obj_spots.append({'pos':[obj.x, obj.y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
         
@@ -1306,6 +1310,8 @@ class App(QWidget):
         self.original_scatter.clear()
         self.simulated_scatter.clear()
         self.develop_scatter1.clear()
+        self.develop_scatter2.clear()
+        self.develop_scatter2.addPoints(obj_yz)
         self.plot_boxes(self.original_radar_plot, self.trk_rects)
         if self.original_object_checkbox.isChecked() :
             self.original_scatter.addPoints(obj_spots)

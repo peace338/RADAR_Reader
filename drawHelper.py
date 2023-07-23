@@ -8,6 +8,11 @@ GRAPH_MAX_X = 90           # (20)
 GRAPH_MIN_Y = -4.5
 GRAPH_MAX_Y = 4.5
 
+YZ_GRAPH_MIN_X = 0          # (-20)
+YZ_GRAPH_MAX_X = 10           # (20)
+YZ_GRAPH_MIN_Y = -4.5
+YZ_GRAPH_MAX_Y = 4.5
+
 def drawGridPolarCoord(pyqtGraph):
     radius = np.linspace(0, 1, 5)  # 반지름 값
     theta = np.linspace(0, 2 * np.pi, 360)  # 각도 값
@@ -38,8 +43,14 @@ def getAzim(sinAzim):
         ret = sinAzim
     return ret
 
-def setPlot(pgplot):
+def setPlot(pgplot, format = "ThetaDoppler"):
     pgplot.showGrid(True, True, 0.5)
-    pgplot.setLabel('left', 'speed(m/s)')
-    pgplot.setLabel('bottom', 'angle(Degree)')
-    pgplot.setRange(QRectF(GRAPH_MIN_X, GRAPH_MIN_Y, GRAPH_MAX_X-GRAPH_MIN_X, GRAPH_MAX_Y-GRAPH_MIN_Y),disableAutoRange = True)
+    
+    if format == "ThetaDoppler":
+        pgplot.setLabel('left', 'speed(m/s)')
+        pgplot.setLabel('bottom', 'angle(Degree)')
+        pgplot.setRange(QRectF(GRAPH_MIN_X, GRAPH_MIN_Y, GRAPH_MAX_X-GRAPH_MIN_X, GRAPH_MAX_Y-GRAPH_MIN_Y),disableAutoRange = True)
+    elif format == "YZ":
+        pgplot.setLabel('left', 'z(m)')
+        pgplot.setLabel('bottom', 'y(m)')
+        pgplot.setRange(QRectF(YZ_GRAPH_MIN_X, YZ_GRAPH_MIN_Y, YZ_GRAPH_MAX_X-YZ_GRAPH_MIN_X, YZ_GRAPH_MAX_Y-YZ_GRAPH_MIN_Y),disableAutoRange = True)
