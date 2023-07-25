@@ -24,7 +24,7 @@ def drawGridPolarCoord(pyqtGraph):
         # pyqtGraph.plot(x, y, pen='b', antialias=True)
 
 
-def drawGridPolarCoord(pyqtGraph, theta):
+def drawFOV_XY(pyqtGraph, theta):
 
 
     # 극 좌표계 그리드 그리기
@@ -33,6 +33,16 @@ def drawGridPolarCoord(pyqtGraph, theta):
     #     y = r * np.sin(theta)
     pyqtGraph.plot([0,15], [0,15 * np.tan((90 - theta) * np.pi /180)], pen ='w')
     pyqtGraph.plot([0,-15], [0,15 * np.tan((90 - theta) * np.pi /180)], pen ='w')
+
+def drawFOV_YZ(pyqtGraph, theta):
+
+
+    # 극 좌표계 그리드 그리기
+    # for r in radius:
+    #     x = r * np.cos(theta)
+    #     y = r * np.sin(theta)
+    pyqtGraph.plot([0,15], [0,15 * np.tan((theta) * np.pi /180)], pen ='w')
+    pyqtGraph.plot([0,15], [0,-15 * np.tan((theta) * np.pi /180)], pen ='w')
 
 def getAzim(sinAzim):
     if sinAzim > 1.0:
@@ -54,3 +64,4 @@ def setPlot(pgplot, format = "ThetaDoppler"):
         pgplot.setLabel('left', 'z(m)')
         pgplot.setLabel('bottom', 'y(m)')
         pgplot.setRange(QRectF(YZ_GRAPH_MIN_X, YZ_GRAPH_MIN_Y, YZ_GRAPH_MAX_X-YZ_GRAPH_MIN_X, YZ_GRAPH_MAX_Y-YZ_GRAPH_MIN_Y),disableAutoRange = True)
+

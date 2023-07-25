@@ -536,7 +536,7 @@ class App(QWidget):
         self.develop_plot1 = pg.plot()
         self.develop_plot2 = pg.plot()
         setPlot(self.develop_plot1)
-        setPlot(self.develop_plot2, format = "YZ")
+        
 
         original_radar_plot_menu_item = self.original_radar_plot.plotItem.vb.menu.actions()
         self.original_radar_plot.plotItem.vb.menu.removeAction(original_radar_plot_menu_item[3])
@@ -561,8 +561,8 @@ class App(QWidget):
         self.original_radar_plot.setWindowTitle("Movon RADAR")
         self.original_radar_plot.setLabel('left', 'y-axis (meter)')
         self.original_radar_plot.setLabel('bottom', 'x-axis (meter)')
-        drawGridPolarCoord(self.original_radar_plot, 65)
-        drawGridPolarCoord(self.simulated_radar_plot, 65)
+        drawFOV_XY(self.original_radar_plot, 65)
+        drawFOV_YZ(self.simulated_radar_plot, 16)
         self.simulated_radar_plot.setWindowTitle("Movon RADAR")
         self.simulated_radar_plot.setLabel('left', 'y-axis (meter)')
         self.simulated_radar_plot.setLabel('bottom', 'x-axis (meter)')
@@ -572,7 +572,7 @@ class App(QWidget):
             self.simulated_radar_plot.setRange(QRectF(EGO_GRAPH_MIN_X, EGO_GRAPH_MIN_Y, EGO_GRAPH_MAX_X-EGO_GRAPH_MIN_X, EGO_GRAPH_MAX_Y-EGO_GRAPH_MIN_Y),disableAutoRange = True)
         else:
             self.simulated_radar_plot.setRange(QRectF(GRAPH_MIN_X, GRAPH_MIN_Y, GRAPH_MAX_X-GRAPH_MIN_X, GRAPH_MAX_Y-GRAPH_MIN_Y),disableAutoRange = True)
-
+        setPlot(self.simulated_radar_plot, format = "YZ")
         self.simulated_radar_plot.plotItem.showGrid(True, True, 0.5)
         
 
@@ -1311,7 +1311,7 @@ class App(QWidget):
         self.simulated_scatter.clear()
         self.develop_scatter1.clear()
         self.develop_scatter2.clear()
-        self.develop_scatter2.addPoints(obj_yz)
+        self.simulated_scatter.addPoints(obj_yz)
         self.plot_boxes(self.original_radar_plot, self.trk_rects)
         if self.original_object_checkbox.isChecked() :
             self.original_scatter.addPoints(obj_spots)
