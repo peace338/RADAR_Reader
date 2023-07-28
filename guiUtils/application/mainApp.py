@@ -1191,7 +1191,8 @@ class App(QWidget):
         self.remove_boxes(self.original_radar_plot, self.trk_rects)
         self.trk_rects=[]
         # pdb.set_trace()
-        self.scatter_plot_3d.writePlot(np.array(objs3d))
+        objs3df = np.concatenate((np.array(objs3d), np.array(flags).reshape(-1,1)), axis = 1)
+        self.scatter_plot_3d.writePlot(np.array(objs3df))
 
         for obj, flag in zip(objs, flags) :
             if flag == 1:

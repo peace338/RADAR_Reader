@@ -13,7 +13,7 @@ def _kernelTrick(X):
 
 class egoMotionEst():
     def __init__(self):
-        self.clf = RANSACRegressor(estimator=LinearRegression(fit_intercept=False, n_jobs=-1), residual_threshold = 0.13, max_trials = 50)
+        self.clf = RANSACRegressor(estimator=LinearRegression(fit_intercept=False, n_jobs=-1), residual_threshold = 0.13, max_trials = 15)
         self.xDomian = np.arange(-90,90,5)[:, np.newaxis]
 
     def process(self, objs):
