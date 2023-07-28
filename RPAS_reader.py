@@ -145,11 +145,14 @@ class Scatter3DPlot(QWidget):
         layout.addWidget(self.canvas)
         
         self.ax = self.fig.add_subplot(111, projection='3d')
-        self.ax.auto_scale_xyz([GRAPH_MIN_X, GRAPH_MAX_X], [GRAPH_MIN_Y, GRAPH_MAX_Y], [-4, -4])
-        self.ax.set_box_aspect((4, 2, 1))
-        self.ax.view_init(azim=90, elev=20)
+        # pdb.set_trace()
+        # self.ax.set_xscale(5)
+        # self.ax.set_aspect('equal')
+        self.ax.set_box_aspect((20, 10, 4))
+        self.ax.auto_scale_xyz([GRAPH_MIN_X, GRAPH_MAX_X], [GRAPH_MIN_Y, GRAPH_MAX_Y], [0, 4])
+        self.ax.view_init(azim=-90, elev=20)
         # Plot the scatter points
-        self.fig.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9)
+        self.fig.subplots_adjust(left=-0.15, right=1.15, bottom=-0.15, top=1.15)
 
         # Set labels for the axes
         self.ax.set_xlabel('X(m)')
