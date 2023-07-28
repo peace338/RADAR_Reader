@@ -18,6 +18,11 @@ import pdb
 import math
 from anomalyDetection import *
 from drawHelper import *
+
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+import numpy as np
 #####################################################################################
 #   Constants - for User. User can modify the values freely                         #
 #####################################################################################
@@ -124,6 +129,54 @@ Q14_DIVISOR = 16384
 IT_IS_NOT_SIMULATION = 0
 IT_IS_SIMULATION = 1
 
+class Scatter3DPlot(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        plt.style.use('dark_background')
+        self.scatter = -1
+        layout = QVBoxLayout(self)
+
+        # Create the 3D scatter plot
+        self.fig = plt.figure()
+        self.canvas = FigureCanvas(self.fig)
+        layout.addWidget(self.canvas)
+        
+        self.ax = self.fig.add_subplot(111, projection='3d')
+        self.ax.auto_scale_xyz([GRAPH_MIN_X, GRAPH_MAX_X], [GRAPH_MIN_Y, GRAPH_MAX_Y], [-4, -4])
+        self.ax.set_box_aspect((4, 2, 1))
+        self.ax.view_init(azim=90, elev=20)
+        # Plot the scatter points
+        self.fig.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9)
+
+        # Set labels for the axes
+        self.ax.set_xlabel('X(m)')
+        self.ax.set_ylabel('Y(m)')
+        self.ax.set_zlabel('Z(m)')
+
+        # self.ax.set_xlim3d(-5,5)
+        # self.ax.set_ylim3d(0,12)
+        # self.ax.set_zlim3d(-2,2)
+
+        # Show the plot
+        # pdb.set_trace()
+        # self.writePlot()
+
+    def writePlot(self, objs):
+        if self.scatter != -1:
+            self.clearPlot()
+
+        # x = np.random.rand(5)
+        # y = np.random.rand(5)
+        # z = np.random.rand(5)
+        self.scatter = self.ax.scatter(objs[:,0], objs[:,1], objs[:,2], c='b', s=50)
+        self.canvas.draw()
+        self.scatterWrittenFlag = 1
+    def clearPlot(self):
+        self.scatter.remove()
+        # self.canvas.draw()        
 
 class App(QWidget):
     def __init__(self):
@@ -135,6 +188,7 @@ class App(QWidget):
 #####################################################################################
     def initUI(self):
         window_size = [1150 + 300, 800]
+        # window_size = [1150, 800]
         dir_path = os.path.dirname(os.path.abspath(__file__))
         self.radar_file_name = []
         self.video_file_name = []
@@ -477,7 +531,7 @@ class App(QWidget):
         self.simulation_progress_bar.setValue(0)
         self.simulation_progress_bar.setTextVisible(True)
         self.simulation_progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.simulation_progress_bar.setVisible(False)
+        self.simulation_progress_bar.setVisible(True)
         
         
 
@@ -499,33 +553,33 @@ class App(QWidget):
         self.develop_widget1 = QWidget(self.graph_frame)
         self.develop_widget1.setFixedSize(280,350)
         self.develop_widget1.move(700, 20)
-        self.develop_widget1.setVisible(True)
+        self.develop_widget1.setVisible(False)
 
         self.develop_widget2 = QWidget(self.graph_frame)
         self.develop_widget2.setFixedSize(280,350)
         self.develop_widget2.move(700, 370)
-        self.develop_widget2.setVisible(True)
+        self.develop_widget2.setVisible(False)
 
         self.original_radar_widget = QWidget(self.graph_frame)
         self.original_radar_widget.setFixedSize(690,350)
         self.original_radar_widget.move(10, 20)
-        self.original_radar_widget.setVisible(True)
+        self.original_radar_widget.setVisible(False)
 
         self.simulated_radar_widget = QWidget(self.graph_frame)
         self.simulated_radar_widget.setFixedSize(690,350)
         self.simulated_radar_widget.move(10, 370)
-        self.simulated_radar_widget.setVisible(True)
+        self.simulated_radar_widget.setVisible(False)
 
         self.original_graph_label = QLabel(self.graph_frame)
         self.original_graph_label.move(20,5)
-        self.original_graph_label.setText("Original Data")
+        self.original_graph_label.setText("XY - plane")
 
         self.graph_font = self.original_graph_label.font()
         self.graph_font.setBold(True)
         self.original_graph_label.setFont(self.graph_font)
         self.simulated_graph_label = QLabel(self.graph_frame)
         self.simulated_graph_label.move(20,360)
-        self.simulated_graph_label.setText("Simulated Data")
+        self.simulated_graph_label.setText("YZ - plane")
         self.simulated_graph_label.setFont(self.graph_font)
         self.simulated_graph_label.setVisible(True)
 
@@ -598,11 +652,18 @@ class App(QWidget):
         self.simulated_layout = QGridLayout()
         self.develop_layout1 = QGridLayout()
         self.develop_layout2 = QGridLayout()
+        self.threeD_layout = QVBoxLayout()
 
+        
         self.original_layout.addWidget(self.original_radar_plot)
         self.simulated_layout.addWidget(self.simulated_radar_plot)
         self.develop_layout1.addWidget(self.develop_plot1)
         self.develop_layout2.addWidget(self.develop_plot2)
+        self.threeD_layout.addWidget(self.graph_frame)
+
+        self.scatter_plot_3d = Scatter3DPlot()
+        frame_layout = QVBoxLayout(self.graph_frame)
+        frame_layout.addWidget(self.scatter_plot_3d)
 
         self.original_radar_widget.setLayout(self.original_layout)
         self.simulated_radar_widget.setLayout(self.simulated_layout)
@@ -1273,8 +1334,10 @@ class App(QWidget):
         obj_dopplerAzim = []
         filteredObjs = []
         obj_yz = []
+        objs3d = []
         for obj in objs :
             filteredObjs.append([np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed, obj.doppler_idx])
+            objs3d.append([obj.x, obj.y, obj.z])
         # if filteredObjs:
         if filteredObjs:
             if not ransacFlag:
@@ -1285,6 +1348,8 @@ class App(QWidget):
             flags = []
         self.remove_boxes(self.original_radar_plot, self.trk_rects)
         self.trk_rects=[]
+        # pdb.set_trace()
+        self.scatter_plot_3d.writePlot(np.array(objs3d))
 
         for obj, flag in zip(objs, flags) :
             if flag == 1:

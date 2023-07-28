@@ -26,7 +26,7 @@ def ransac_cos(objs):
     idxs = objs[:,0:2]
 
 
-    clf = RANSACRegressor(estimator=LinearRegression(fit_intercept=False, n_jobs=-1), residual_threshold = 0.13, max_trials = 50)
+    clf = RANSACRegressor(estimator=LinearRegression(fit_intercept=False, n_jobs=-1), residual_threshold = 0.13, max_trials = 15)
     #if fit_intercept= False then fitting model is v(\theta) = - vx*sin(\theta) -vy*cos(\theta). if not the fitting model is v(\theta) = - vx*sin(\theta) -vy*cos(\theta) + c.
     # print(clf.estimator_)
     # clf.estimator_.get_params()
