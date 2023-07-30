@@ -1,2 +1,7 @@
 .idea/
 __pycache__/
+*.mp4
+*.avi
+*.rdb
+*.sdb
+

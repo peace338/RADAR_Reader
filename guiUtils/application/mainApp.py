@@ -1180,11 +1180,13 @@ class App(QWidget):
         filteredObjs = []
         obj_yz = []
         objs3d = []
+        
         for obj in objs :
             filteredObjs.append([np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed, obj.doppler_idx])
-            objs3d.append([obj.x, obj.y, obj.z])
+            objs3d.append([obj.x, obj.y, obj.z, obj.range])
         # if filteredObjs:
         if filteredObjs:
+            # print(len(filteredObjs))
             flags, line_x, line_y, vx, vy = self.ransac.process(np.array(filteredObjs))
         else:
             flags = []
@@ -1215,24 +1217,24 @@ class App(QWidget):
             #                                 'pen' : (255, 0, 255, 255), 'brush' : (0, 0, 0, 0)})
             #  'sourceRect' : (trk[ii].x, trk[ii].y, 11,30)
         
-        self.original_scatter.clear()
-        self.simulated_scatter.clear()
-        self.develop_scatter1.clear()
-        self.develop_scatter2.clear()
-        self.simulated_scatter.addPoints(obj_yz)
-        self.plot_boxes(self.original_radar_plot, self.trk_rects)
-        if self.original_object_checkbox.isChecked() :
-            self.original_scatter.addPoints(obj_spots)
-        if self.original_track_checkbox.isChecked() :
-            # print(trk_spots)
-            self.original_scatter.addPoints(trk_spots)
+        # self.original_scatter.clear()
+        # self.simulated_scatter.clear()
+        # self.develop_scatter1.clear()
+        # self.develop_scatter2.clear()
+        # self.simulated_scatter.addPoints(obj_yz)
+        # self.plot_boxes(self.original_radar_plot, self.trk_rects)
+        # if self.original_object_checkbox.isChecked() :
+        #     self.original_scatter.addPoints(obj_spots)
+        # if self.original_track_checkbox.isChecked() :
+        #     # print(trk_spots)
+        #     self.original_scatter.addPoints(trk_spots)
         
-        # if self.simulated_object_checkbox.isChecked() :
-        self.develop_scatter1.addPoints(obj_dopplerAzim)
-        if (ransacFlag):
-            if self.line1 != 0:
-                self.remove_curves(self.develop_plot1, self.line1)
-            self.line1 = self.plot_curves(self.develop_plot1, line_x[:,0], line_y)
+        # # if self.simulated_object_checkbox.isChecked() :
+        # self.develop_scatter1.addPoints(obj_dopplerAzim)
+        # if (ransacFlag):
+        #     if self.line1 != 0:
+        #         self.remove_curves(self.develop_plot1, self.line1)
+        #     self.line1 = self.plot_curves(self.develop_plot1, line_x[:,0], line_y)
         # print(speed_num, speed_als_num, len(obj), speed_num/len(obj), speed_als_num/len(obj) )
     
     def simulated_graph_update(self, objs, trks) :
@@ -1276,20 +1278,20 @@ class App(QWidget):
             # else :
             #     trk_candidate_spots.append({'pos':[trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y],'data': 2})
                 
-        self.simulated_scatter.clear()
-        self.develop_scatter2.clear()
-        # self.develop_plotItem.clear()
-        self.plot_boxes(self.simulated_radar_plot, self.trk_rects_sim)
-        if self.simulated_object_checkbox.isChecked() :
-            self.simulated_scatter.addPoints(obj_spots, brush=(255,0,0,255))
-        if self.simulated_track_checkbox.isChecked() :
-            self.simulated_scatter.addPoints(trk_spots, brush=(255,255,255,255))
-        # if self.simulated_candidate_checkbox.isChecked() :
-        #     self.simulated_scatter.addPoints(trk_candidate_spots, brush=(0,255,0,255))
-        self.develop_scatter2.addPoints(obj_dopplerAzim)
-        if self.line2 != 0:
-            self.remove_curves(self.develop_plot2, self.line2)
-        self.line2 = self.plot_curves(self.develop_plot2, line_x[:,0], line_y)
+        # self.simulated_scatter.clear()
+        # self.develop_scatter2.clear()
+        # # self.develop_plotItem.clear()
+        # self.plot_boxes(self.simulated_radar_plot, self.trk_rects_sim)
+        # if self.simulated_object_checkbox.isChecked() :
+        #     self.simulated_scatter.addPoints(obj_spots, brush=(255,0,0,255))
+        # if self.simulated_track_checkbox.isChecked() :
+        #     self.simulated_scatter.addPoints(trk_spots, brush=(255,255,255,255))
+        # # if self.simulated_candidate_checkbox.isChecked() :
+        # #     self.simulated_scatter.addPoints(trk_candidate_spots, brush=(0,255,0,255))
+        # self.develop_scatter2.addPoints(obj_dopplerAzim)
+        # if self.line2 != 0:
+        #     self.remove_curves(self.develop_plot2, self.line2)
+        # self.line2 = self.plot_curves(self.develop_plot2, line_x[:,0], line_y)
         #     self.line.clear()
         # self.line = self.develop_plot2.plot(line_x[:,0], line_y)
         # print(line_x[:,0])

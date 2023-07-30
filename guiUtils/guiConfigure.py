@@ -5,6 +5,8 @@ GRAPH_MIN_X = -10          # (-20)
 GRAPH_MAX_X = 10           # (20)
 GRAPH_MIN_Y = 0
 GRAPH_MAX_Y = 10
+GRAPH_MAX_Z = 4
+GRAPH_MIN_Z = 0
 
 EGO_GRAPH_MIN_X = -90           # (-20)
 EGO_GRAPH_MAX_X = 90           # (20)
