@@ -1,9 +1,9 @@
 import numpy as np
-import CONST
+from . import CONST
 if CONST.TDM_MIMO:
-	import mrr_config_chirp_design_MRR160_TDM_MIMO as MRRchirpCfg
+	from . import mrr_config_chirp_design_MRR160_TDM_MIMO as MRRchirpCfg
 else:
-	import mrr_config_chirp_design_MRR160 as MRRchirpCfg
+	from . import mrr_config_chirp_design_MRR160 as MRRchirpCfg
 
 INF = 16383
 
@@ -187,7 +187,7 @@ class clusterCfgMRR(config):
 	ellipsoidA = 0.5				# X축: (2.0) --> 3.0
 	ellipsoidB = 0.5				# Y축: (1.0) --> 1.5
 	ellipsoidC = 1.0				# 속도: (3.0)
-
+	ellipsoidD = 0.5
 
 class clusterCfgSEW(config):
 	isGuardRail = False

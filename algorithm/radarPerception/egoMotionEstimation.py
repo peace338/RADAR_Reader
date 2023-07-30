@@ -16,7 +16,7 @@ class egoMotionEst():
         self.clf = RANSACRegressor(estimator=LinearRegression(fit_intercept=False, n_jobs=-1), residual_threshold = 0.13, max_trials = 15)
         self.xDomian = np.arange(-90,90,5)[:, np.newaxis]
 
-    def process(self, objs):
+    def __call__(self, objs):
         idxs = objs[:,0:2]
         self.clf.fit(_kernelTrick(idxs[:,0].reshape(-1,1)), idxs[:,1])
         ret = [classifier2(x) for x in self.clf.inlier_mask_]

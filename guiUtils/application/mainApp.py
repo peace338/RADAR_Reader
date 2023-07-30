@@ -20,6 +20,7 @@ from .plotApp import *
 from ..dataParser.dataClass import *
 
 from algorithm.radarPerception.egoMotionEstimation import egoMotionEst
+from algorithm.algorithmMain import RadarAlgorithm
 class App(QWidget):
     def __init__(self):
         super().__init__()
@@ -29,6 +30,7 @@ class App(QWidget):
 #   Class - App ==> Drawing GUIs                                                    #
 #####################################################################################
     def initUI(self):
+        self.algorithm = RadarAlgorithm()
         self.ransac = egoMotionEst()
         window_size = [1150 + 300, 800]
         # window_size = [1150, 800]
@@ -1187,7 +1189,7 @@ class App(QWidget):
         # if filteredObjs:
         if filteredObjs:
             # print(len(filteredObjs))
-            flags, line_x, line_y, vx, vy = self.ransac.process(np.array(filteredObjs))
+            flags, line_x, line_y, vx, vy = self.ransac(np.array(filteredObjs))
         else:
             flags = []
         self.remove_boxes(self.original_radar_plot, self.trk_rects)
@@ -1439,6 +1441,7 @@ class App(QWidget):
         self.componenet_update()
         self.get_original_radar_data_in_frame(self.radar_current_frame_num, IT_IS_NOT_SIMULATION, 0)       # simulation_flag = 0, radar_num = 0
         # egoDopplerState = self.egomotion_graph_update(self.original_object_list, self.original_track_list)
+        self.algorithm(self.original_object_list)
         self.original_graph_update(self.original_object_list, self.original_track_list)
         if self.no_simulation_data_flag == 0 :
             self.get_simulated_radar_data_in_frame(self.radar_current_frame_num)

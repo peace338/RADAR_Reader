@@ -1,17 +1,14 @@
 import numpy as np
-import dataStructure as dT
+import algorithm.dataStructure as dT
 import os
 import matplotlib.pyplot as plt
-import configManager_MRR_DEMO as cfg
-import mmwavelib as ml
+from ..radarConfigure import configManager_MRR_DEMO as cfg
+from .. import mmwavelib as ml
 import copy
 import csv
-import CONST
+from ..radarConfigure import CONST as CONST
 import trackMaker as tm
-import clusteringTmp as CL
-import plot_data as pltd
-import logOut as lg
-import math
+from . import clustering as CL
 
 N_MEAS = 3
 N_STATE = 4
@@ -927,6 +924,19 @@ class Filter:
 	def out(self):
 		return self.mode_list
 
+class Tracking():
+	def __init__(self):
+		self.trackingCfg 	= cfg.trackingCfg()
+		self.tracker 		= dT.genTracker()
+		self.RadarInfo 		= dT.radar_info()
+
+	def __call__(self, measList):
+		imm_ekfRun(measList, self.tracker, self.trackingCfg, 0, self.RadarInfo)
+
+		return self.getTracker()
+	
+	def getTracker(self):
+		return self.tracker	
 
 def main():
 	config = cfg.config()

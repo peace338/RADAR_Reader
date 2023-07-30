@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import dataStructure as DT
-import configManager_MRR_DEMO as cfgMan
+from .. import dataStructure as DT
+from ..radarConfigure import configManager_MRR_DEMO as cfgMan
 import copy
-import mmwavelib as ml
+from .. import mmwavelib as ml
 import sys
-import CONST
-import signalGen as sg
+from ..radarConfigure import CONST as CONST
+
 import math
 # Functions
 
@@ -798,88 +798,6 @@ def main_RMSE():
 	plt.legend(loc=1)
 	plt.show()
 
-def main_RMSE_FFT():
-	config = cfgMan.config()
-	aoaCfg = cfgMan.aoaCfg
-	domain = DT.domainGenerator(config, aoaCfg)
-	angleDomainRadian = np.arange(-1 * aoaCfg.maxAngleH, aoaCfg.maxAngleH, aoaCfg.deltaTheta)
-	iteration_RMSE = 100
-	# np.random.seed(6)
-	noisePower = 10000
-	SNR = -20
-	data = DT.dataManager(cfgMan.config)
-	domain = DT.domainGenerator(cfgMan.config, cfgMan.aoaCfg)
-	resList = domain.getResolution()
-	dopplerDomain = domain.dopplerDomain
-	rangeDomain = domain.rangeDomain
-
-	lamda = 1  # wavelength
-	kappa = np.pi / lamda  # wave number
-
-	M = aoaCfg.numAziChannel  # number of ULA elements
-
-	domain_Error = np.arange(5, 50, 2)
-	DOA_List = ["3DFFT", "ILS_OMP", "RISR", "FOCUSS"]
-	DOAobj_List = []
-	for doaType in DOA_List:
-		globals()["DOAobj_{}".format(doaType)] = DOA_RMSE(doaType)
-		DOAobj_List.append(globals()["DOAobj_{}".format(doaType)])
-
-	for angle in domain_Error:
-		print("hi",angle)
-		for i in range(iteration_RMSE):
-			print("iter : ", i)
-			ThetasInDEG = np.array([0, angle])
-			Thetas = ThetasInDEG * np.pi / 180  # random source directions
-
-			data.reset()
-			for theta in ThetasInDEG:
-				data.adcData += sg.signalGenerator(15, 0, theta, noisePower, SNR)
-			data.adcData += sg.noiseGenerator(noisePower)
-			ml.RangeFFT(data, config, winType=config.winType)
-			ml.DopplerFFT(data, config, "HAMMING")
-
-			heatMap = ml.avgHeatMap(data.FFTData, config, True)
-			cfarOut2DList = ml.cfar2D(heatMap, cfgMan.cfarCfgRange, cfgMan.cfarCfgDoppler,
-			                          K=cfgMan.cfarCfgDoppler.maxNumDet)
-			cfarOut2D = cfarOut2DList[CONST.targetIdxPlotSpec]
-			h = data.FFTData[cfarOut2D.rangeIdx, cfarOut2D.dopplerIdx, :]
-			if CONST.DO_RX_COMPENSATION:
-				h = ml.MmwDemo_rxChanPhaseBiasCompensation(h, aoaCfg.rxChComp)
-
-			for DOAobj in DOAobj_List:
-				if DOAobj.DOA_type == "3DFFT":
-					_, angleList = DOA_3DFFT(h, aoaCfg, domain)
-				elif DOAobj.DOA_type == "ILS_OMP":
-					_, angleList = ILS_OMP(h, aoaCfg)
-				elif DOAobj.DOA_type == "RISR":
-					_, angleList = RISR(h, aoaCfg)
-				elif DOAobj.DOA_type == "RISR_FFT":
-					_, angleList = RISR_FFT(h, aoaCfg, domain)
-				elif DOAobj.DOA_type == "FOCUSS":
-					_, angleList = FOCUSS(h, aoaCfg)
-				else:
-					print("ERROR : It's not a available DOA type")
-					sys.exit(1)
-
-				if DOAobj.DOA_type == "3DFFT":
-					DOAobj.cal_RMSE(angleList, domain.angleDomain, Thetas)
-				else:
-					DOAobj.cal_RMSE(angleList, angleDomainRadian, Thetas)
-
-		for DOAobj in DOAobj_List:
-			DOAobj.appendRMSE()
-			DOAobj.resetRMSE()
-
-	for DOAobj in DOAobj_List:
-		plt.plot(domain_Error, np.array(DOAobj.RMSE_list, dtype = np.float)*180/np.pi, label = DOAobj.DOA_type)
-	# plt.plot(domain_Error, np.array(Error_ILS_OMP_MMSE_List, dtype=np.float) * 180 / np.pi, label="ILS_OMP_MMSE")
-	plt.ylabel('RMSE(deg)')
-	plt.xlabel('deg')
-	plt.grid(linestyle=":")
-	plt.legend(loc=1)
-	plt.show()
-
 def noiseGen(amp, snr, channel):
 
 	noiseAmp = amp * 10 **(-snr/20)
@@ -912,9 +830,7 @@ def main():
 	Thetas = ThetasInDEG * np.pi / 180  # random source directions
 
 	data.reset()
-	for theta in ThetasInDEG:
-		data.adcData += sg.signalGenerator(15, 0, theta, noisePower, SNR)
-	data.adcData += sg.noiseGenerator(noisePower)
+
 	ml.RangeFFT(data, config, winType=config.winType)
 	ml.DopplerFFT(data, config, "HAMMING")
 

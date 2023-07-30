@@ -1,9 +1,10 @@
-import configManager_MRR_DEMO as cfg
+import algorithm.radarConfigure.configManager_MRR_DEMO as cfg
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-import dataStructure as dT
+import algorithm.dataStructure as dT
 import copy
+
 INPUT_NOISE = np.diag([1.0, np.deg2rad(30.0)]) ** 2
 GPS_NOISE = np.diag([0.5, 0.5]) ** 2
 

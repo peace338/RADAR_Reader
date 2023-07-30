@@ -1,11 +1,11 @@
 import numpy as np
-import dataStructure as DT
-import CONST
+import algorithm.dataStructure as DT
+import algorithm.radarConfigure.CONST as CONST
 import math
 
 DEBUG = False
 
-def convertSNRdBToVar(SNRdB, n_samples, resolution):
+def _convertSNRdBToVar(SNRdB, n_samples, resolution):
 	# print(SNRdB)
 	scaleFac = n_samples*resolution
 	invSNRlin = 1 / pow(2, SNRdB ) * 2 # board 에서 스펙트럼은 QFormat 8인데 7인걸로 연산 We assume our estimator is 3dB worse than the CRLB.
@@ -21,9 +21,9 @@ def convertSNRdBToVar(SNRdB, n_samples, resolution):
 	return Rvar
 
 
-def convertSNRLinToVar(SNRdB, n_samples, resolution):
+def _convertSNRLinToVar(SNRdB, n_samples, resolution):
 	if DEBUG:
-		print("convertSNRLinToVar start")
+		print("_convertSNRLinToVar start")
 		print("input SNRdB : %f" % (SNRdB * 6))
 
 	invSNRlin = 1 / (2 ** SNRdB) # board 에서 스펙트럼은 QFormat 8인데 7인걸로 연산
@@ -38,9 +38,9 @@ def convertSNRLinToVar(SNRdB, n_samples, resolution):
 	return Rvar
 
 
-def getSigmatheta(SNRdB, n_samples, targetAzim, scale, maxSizeflt, targetRange):
+def _getSigmatheta(SNRdB, n_samples, targetAzim, scale, maxSizeflt, targetRange):
 	if DEBUG:
-		print("convertSNRLinToVar start")
+		print("_convertSNRLinToVar start")
 		print("input SNRdB : %f" % (SNRdB * 6))
 
 	invSNRlin = 2 / (2 ** SNRdB) # board 에서 스펙트럼은 QFormat 8인데 7인걸로 연산
@@ -62,7 +62,7 @@ def getSigmatheta(SNRdB, n_samples, targetAzim, scale, maxSizeflt, targetRange):
 	return Rvar
 
 
-def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
+def _clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 	clusterOutputList = []
 
 	for cluster in clusterList:
@@ -74,6 +74,7 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 			for obj in cluster:
 				tmpClusterOutput.xCenter += obj.x
 				tmpClusterOutput.yCenter += obj.y
+				tmpClusterOutput.zCenter += obj.z
 				tmpClusterOutput.avgVel += obj.speed
 
 				# Cente of Mass
@@ -88,6 +89,7 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 
 			tmpClusterOutput.xCenter = tmpClusterOutput.xCenter / clusterLength
 			tmpClusterOutput.yCenter = tmpClusterOutput.yCenter / clusterLength
+			tmpClusterOutput.zCenter = tmpClusterOutput.zCenter / clusterLength
 			tmpClusterOutput.avgVel  = tmpClusterOutput.avgVel / clusterLength
 
 			trackingInputRangeAvg   = np.sqrt(tmpClusterOutput.xCenter*tmpClusterOutput.xCenter + tmpClusterOutput.yCenter * tmpClusterOutput.yCenter)
@@ -98,10 +100,12 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 			for obj in cluster:  # obj Type : cfarOutFmt3D
 				tmpClusterOutput.xCenter += obj.x
 				tmpClusterOutput.yCenter += obj.y
+				tmpClusterOutput.zCenter += obj.z
 				tmpClusterOutput.avgVel += obj.speed
 
 			tmpClusterOutput.xCenter = tmpClusterOutput.xCenter / lengthOfCluster
 			tmpClusterOutput.yCenter = tmpClusterOutput.yCenter / lengthOfCluster
+			tmpClusterOutput.zCenter = tmpClusterOutput.zCenter / lengthOfCluster
 			tmpClusterOutput.avgVel = tmpClusterOutput.avgVel / lengthOfCluster
 
 		peakVal = 0
@@ -121,18 +125,22 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 			if (tmpClusterOutput.xSize == 0) or (tmpClusterOutput.ySize == 0):
 				tmpClusterOutput.xSize = 1 * resList[0]
 				tmpClusterOutput.ySize = 1 * resList[0]
+				tmpClusterOutput.zSize = 1 * resList[0]
 			else:
 				tmpClusterOutput.xSize += 0.5 * resList[0]
 				tmpClusterOutput.ySize += 0.5 * resList[0]
+				tmpClusterOutput.zSize += 0.5 * resList[0]
 		else:
 			if (tmpClusterOutput.xSize == 0) or (tmpClusterOutput.ySize == 0):
 				tmpClusterOutput.xSize = 3 * resList[0]
 				tmpClusterOutput.ySize = 3 * resList[0]
+				tmpClusterOutput.zSize = 3 * resList[0]
 
 		# ======================================================================================================================================================
 		# populate trackingInput from tmpClusterOutput.strongestMember
 		tmpClusterOutput.trackingInput.xSize = tmpClusterOutput.xSize
 		tmpClusterOutput.trackingInput.ySize = tmpClusterOutput.ySize
+		tmpClusterOutput.trackingInput.zSize = tmpClusterOutput.zSize
 
 		# ======================================================================================================================================================
 		if CONST.trackingInputMODIFY:
@@ -159,7 +167,7 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 
 		if CONST.R_modify:
 			tmpClusterOutput.trackingInput.measCovVec[0] = \
-				convertSNRdBToVar(tmpClusterOutput.strongestMember.rangeSNR, len(domain.rangeDomain), resList[0])
+				_convertSNRdBToVar(tmpClusterOutput.strongestMember.rangeSNR, len(domain.rangeDomain), resList[0])
 
 			maxSizeflt = 0
 			if tmpClusterOutput.xSize > tmpClusterOutput.ySize:
@@ -173,18 +181,18 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 				tmpClusterOutput.trackingInput.measCovVec[0] = tmpThresh
 
 			tmpClusterOutput.trackingInput.measCovVec[1] = \
-				convertSNRdBToVar(tmpClusterOutput.strongestMember.dopplerSNR,
+				_convertSNRdBToVar(tmpClusterOutput.strongestMember.dopplerSNR,
 				                  len(domain.dopplerDomain), resList[1])
 
 			tmpClusterOutput.trackingInput.measCovVec[2] = \
-				getSigmatheta(tmpClusterOutput.strongestMember.rangeSNR,
+				_getSigmatheta(tmpClusterOutput.strongestMember.rangeSNR,
 								clusteringCfg.numTx * clusteringCfg.numRx,
 								tmpClusterOutput.trackingInput.measVectorRRD[2], 0.1, tmpClusterOutput.xSize,
 				                tmpClusterOutput.trackingInput.measVectorRRD[0])
 
 		else:
 			tmpClusterOutput.trackingInput.measCovVec[0] = \
-				convertSNRdBToVar(tmpClusterOutput.strongestMember.rangeSNR, len(domain.rangeDomain), resList[0])
+				_convertSNRdBToVar(tmpClusterOutput.strongestMember.rangeSNR, len(domain.rangeDomain), resList[0])
 
 			maxSizeflt = 0
 			if tmpClusterOutput.xSize > tmpClusterOutput.ySize:
@@ -206,11 +214,11 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 				tmpClusterOutput.trackingInput.measCovVec[0] = tmpThresh
 
 			tmpClusterOutput.trackingInput.measCovVec[1] = \
-				convertSNRdBToVar(tmpClusterOutput.strongestMember.dopplerSNR,
+				_convertSNRdBToVar(tmpClusterOutput.strongestMember.dopplerSNR,
 				                  len(domain.dopplerDomain), resList[1])
 
 			tmpClusterOutput.trackingInput.measCovVec[2] = \
-				convertSNRLinToVar(tmpClusterOutput.strongestMember.angleSNR,
+				_convertSNRLinToVar(tmpClusterOutput.strongestMember.angleSNR,
 			                        clusteringCfg.numTx * clusteringCfg.numRx,
 			                        1 / (clusteringCfg.numTx * clusteringCfg.numRx))
 
@@ -258,7 +266,7 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 	return clusterOutputList
 
 
-def clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, RadarInfo):
+def _clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, RadarInfo):
 	tempCluster = []
 	neighCount = 0
 
@@ -267,31 +275,25 @@ def clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, RadarI
 	for compObj in objList:
 		if compObj.visited:
 			continue
-
-		if clusteringCfg.isGuardRail == False:
-			if abs(currObj.speed - compObj.speed) > clusteringCfg.ellipsoidC:
-				continue
-
-			### Object Flag 적용
-			if RadarInfo.mode == 2:
-				if (currObj.statusFlag & 7) != (compObj.statusFlag & 7):
-					continue
-			### Object Flag 적용
-
-		if abs(currObj.rotatex - compObj.rotatex) > clusteringCfg.ellipsoidA:
+		
+		if abs(currObj.speed - compObj.speed) > clusteringCfg.ellipsoidC:
 			continue
 
-		if abs(currObj.rotatey - compObj.rotatey) > clusteringCfg.ellipsoidB:
+		if abs(currObj.x - compObj.x) > clusteringCfg.ellipsoidA:
 			continue
 
-		a = currObj.rotatex - compObj.rotatex
-		b = currObj.rotatey - compObj.rotatey
+		if abs(currObj.y - compObj.y) > clusteringCfg.ellipsoidB:
+			continue
+
+		a = currObj.x - compObj.x
+		b = currObj.y - compObj.y
 		c = currObj.speed - compObj.speed
+		d = currObj.z - compObj.z
 
 		sumA = (a * a) / (clusteringCfg.ellipsoidA*clusteringCfg.ellipsoidA)
 		sumB = (b * b) / (clusteringCfg.ellipsoidB*clusteringCfg.ellipsoidB)
 		sumC = (c * c) / (clusteringCfg.ellipsoidC*clusteringCfg.ellipsoidC)
-
+		sumD = (d * d) / (clusteringCfg.ellipsoidD*clusteringCfg.ellipsoidD)
 		if clusteringCfg.isGuardRail == False:
 			if (sumA < epsilon2WithSpeed) and (sumB < epsilon2WithSpeed) and (sumC < epsilon2WithSpeed):
 				if compObj.scope:
@@ -308,7 +310,7 @@ def clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, RadarI
 	return tempCluster, neighCount
 
 
-def clusteringDBscanRun(objList, clusteringCfg, resList, domain, RadarInfo):  # objList consist with object of class cfarOutFmt3D.
+def _clusteringDBscanRun(objList, clusteringCfg, resList, domain, RadarInfo):  # objList consist with object of class cfarOutFmt3D.
 	clusterId = 0
 	clusterList = []
 	for currObj in objList:
@@ -317,7 +319,7 @@ def clusteringDBscanRun(objList, clusteringCfg, resList, domain, RadarInfo):  # 
 
 		currObj.visited = True
 
-		tempCluster, neighCount = clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, RadarInfo)
+		tempCluster, neighCount = _clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, RadarInfo)
 		tempCluster.append(currObj)
 		tmpConditon = neighCount < (clusteringCfg.minPointsInCluster - 1)
 
@@ -336,7 +338,7 @@ def clusteringDBscanRun(objList, clusteringCfg, resList, domain, RadarInfo):  # 
 
 			for clusterObj in clusterList[-1]: # tag all the neighbors as visited in scope so that it will not be found again when searching neighbor's neighbor.
 				clusterObj.visited = True
-				tempCluster, neighCount = clusteringDBscan_findNeighbors2Fixed(objList, clusterObj, clusteringCfg, RadarInfo)
+				tempCluster, neighCount = _clusteringDBscan_findNeighbors2Fixed(objList, clusterObj, clusteringCfg, RadarInfo)
 
 				if neighCount >= clusteringCfg.minPointsInCluster:
 					if CONST.ellipsoidProcess:
@@ -356,6 +358,19 @@ def clusteringDBscanRun(objList, clusteringCfg, resList, domain, RadarInfo):  # 
 			if clusterId >= clusteringCfg.maxCluster:  # cluster 개수 30개로 한정
 				break
 
-	clusterOutputList = clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain) #calculate the clustering center and edge information.
+	clusterOutputList = _clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain) #calculate the clustering center and edge information.
 
 	return clusterList, clusterOutputList
+
+class Clustering():
+	def __init__(self, clusteringCfg, resList, domain, RadarInfo):
+		self.clusteringCfg = clusteringCfg
+		self.resList = resList
+		self.domain = domain
+		self.RadarInfo = RadarInfo
+
+	def __call__(self, objList):
+
+		clusterList, clusterOutputList = _clusteringDBscanRun(objList, self.clusteringCfg, self.resList, self.domain, self.RadarInfo)
+
+		return clusterList, clusterOutputList

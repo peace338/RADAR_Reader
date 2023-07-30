@@ -1,1 +1,1 @@
-__all__ = ['egoMotionEstimation']
+__all__ = ['egoMotionEstimation', 'clustering', 'IMM']

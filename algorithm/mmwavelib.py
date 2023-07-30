@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import dataStructure as DT
+from . import dataStructure as DT
 import copy
-import CONST
+from .radarConfigure import CONST as CONST
 import os
-import DOA
-import IMM
-import configManager_MRR_DEMO as cfg
+from .radarDetection import DOA as DOA
+from .radarPerception import IMM
+from .radarConfigure import configManager_MRR_DEMO as cfg
 import sys
 import math
 
@@ -3380,29 +3380,32 @@ def estimateGuardRail(clusterList, RadarInfo):
 	return ThresholdY
 
 
-def populateTrackingList(clusterOutputList, ThresholdY, RadarInfo):
+def populateTrackingList(clusterOutputList):
 	tmpTrackingList = []
-
+	# import pdb
+	# pdb.set_trace()
 	for cluster in clusterOutputList:
 		### HSLee 추가 2022.10.28 : Radar 전방 2[m] Clutter 제거
-		clusterNum = cluster.trackingInput.pointNum
+		# clusterNum = cluster.trackingInput.pointNum
 
-		if CONST.trackingInputMODIFY:
-			clusterX = cluster.xCenter
-			clusterY = cluster.yCenter
-		else:
-			clusterX = cluster.strongestMember.x
-			clusterY = cluster.strongestMember.y
+		# if CONST.trackingInputMODIFY:
+		# 	clusterX = cluster.xCenter
+		# 	clusterY = cluster.yCenter
+		# 	clusterX = cluster.zCenter
+		# else:
+		# 	clusterX = cluster.strongestMember.x
+		# 	clusterY = cluster.strongestMember.y
+		# 	clusterZ = cluster.strongestMember.z
 
-		if (clusterNum == 1) and (-0.8 <= clusterX) and (clusterX <= 0.5) and (1.5 <= clusterY) and (clusterY <= 2.5):
-			continue
+		# if (clusterNum == 1) and (-0.8 <= clusterX) and (clusterX <= 0.5) and (1.5 <= clusterY) and (clusterY <= 2.5):
+		# 	continue
 		### HSLee 추가 2022.10.28 : Radar 전방 2[m] Clutter 제거
 
 		### HSLee 추가 2022.09.16
-		Deg2_rad = RadarInfo.angle * np.pi / 180
-		rotateY = -clusterX * np.sin(Deg2_rad) + clusterY * np.cos(Deg2_rad)
-		if (RadarInfo.mode == 1) and (rotateY >= (ThresholdY - 0.2)):
-			cluster.trackingInput.statusFlag =  8
+		# Deg2_rad = RadarInfo.angle * np.pi / 180
+		# rotateY = -clusterX * np.sin(Deg2_rad) + clusterY * np.cos(Deg2_rad)
+		# if (RadarInfo.mode == 1) and (rotateY >= (ThresholdY - 0.2)):
+		# 	cluster.trackingInput.statusFlag =  8
 		### HSLee 추가 2022.09.16
 
 		tmpTrackingList.append(cluster.trackingInput)

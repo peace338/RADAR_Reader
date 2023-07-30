@@ -1,8 +1,8 @@
 import sys
-import CONST
+import algorithm.radarConfigure.CONST as CONST
 import numpy as np
 import enum
-import configManager_MRR_DEMO as cfgMan
+import algorithm.radarConfigure.configManager_MRR_DEMO as cfgMan
 # import mmwavelib as ml
 
 N_STATE = 4
@@ -184,7 +184,8 @@ class trackingInput:
 
 		self.xSize = 0
 		self.ySize = 0
-
+		self.zSize = 0
+		
 		self.validity = False  # Target Out validity tick이 10점을 넘으면 이후로 계속 플롯
 
 		self.associatedObj = None
@@ -270,8 +271,10 @@ class clusterOutput:
 		self.clusterId = -1
 		self.xCenter = 0
 		self.yCenter = 0
+		self.zCenter = 0
 		self.xSize = 0
 		self.ySize = 0
+		self.zSize = 0
 		self.avgVel = 0
 		self.peakVal = 0
 
@@ -321,6 +324,9 @@ class cfarOutFmt3D:
 
 		self.rotatex = 0
 		self.rotatey = 0
+
+		#--ransac--
+		self.status = 0 # -1 : moving target , 1: static target
 
 
 class MmwDemo_objRaw2D_handMade: #for tracking DEBUG
