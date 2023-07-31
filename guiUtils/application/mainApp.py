@@ -1196,7 +1196,7 @@ class App(QWidget):
         self.trk_rects=[]
         # pdb.set_trace()
         objs3df = np.concatenate((np.array(objs3d), np.array(flags).reshape(-1,1)), axis = 1)
-        self.scatter_plot_3d.writePlot(np.array(objs3df))
+        self.scatter_plot_3d.writePoint(np.array(objs3df))
 
         for obj, flag in zip(objs, flags) :
             if flag == 1:

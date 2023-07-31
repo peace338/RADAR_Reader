@@ -8,6 +8,8 @@ GRAPH_MAX_Y = 10
 GRAPH_MAX_Z = 4
 GRAPH_MIN_Z = 0
 
+EQUIP_HEIGHT = 0.6
+
 EGO_GRAPH_MIN_X = -90           # (-20)
 EGO_GRAPH_MAX_X = 90           # (20)
 EGO_GRAPH_MIN_Y = -4.6

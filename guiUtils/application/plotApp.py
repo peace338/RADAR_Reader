@@ -3,13 +3,15 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtMultimedia import *
 from PyQt6.QtMultimediaWidgets import *
-
+from pyqtgraph import Vector
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 
 from ..guiConfigure import *
 import numpy as np
 
+import pyqtgraph.opengl as gl
+from matplotlib import cm
 import pdb
 class Scatter3DPlot(QWidget):
     def __init__(self):
@@ -20,65 +22,45 @@ class Scatter3DPlot(QWidget):
         plt.style.use('dark_background')
         self.scatter = -1
         layout = QVBoxLayout(self)
-
-        # Create the 3D scatter plot
-        self.fig = plt.figure()
-        self.canvas = FigureCanvas(self.fig)
-        layout.addWidget(self.canvas)
+        self.plot_widget = gl.GLViewWidget()
+        self.sp = gl.GLScatterPlotItem(pos=np.array([[0, 0, 0]]), size=10, color=(1, 0, 0, 0.75))        
+        self.plot_widget.addItem(self.sp)
         
-        self.ax = self.fig.add_subplot(111, projection='3d')
-        # pdb.set_trace()
-        # self.ax.set_xscale(5)
-        # self.ax.set_aspect('equal')
-        self.ax.set_box_aspect((GRAPH_MAX_X - GRAPH_MIN_X, GRAPH_MAX_Y, GRAPH_MAX_Z))
-        # self.ax.auto_scale_xyz([GRAPH_MIN_X, GRAPH_MAX_X], [GRAPH_MIN_Y, GRAPH_MAX_Y], [0, 4])
-        self.ax.view_init(azim=-80, elev=20)
-        self.ax.disable_mouse_rotation()
-        # Plot the scatter points
-        self.fig.subplots_adjust(left=-0.15, right=1.15, bottom=-0.15, top=1.15)
+        fov_angle = 130
+        fov_distance = 10  # FOV distance from the radar position
+        fov_rad = np.radians(fov_angle)
+        x_fov = [fov_distance * np.sin(-fov_rad / 2), 0, fov_distance * np.sin(fov_rad / 2)]
+        y_fov = [fov_distance * np.cos(-fov_rad / 2), 0, fov_distance * np.cos(fov_rad / 2)]
+        z_fov = [0 ,0, 0]
 
-        # Set labels for the axes
-        self.ax.set_xlabel('X(m)')
-        self.ax.set_ylabel('Y(m)')
-        self.ax.set_zlabel('Z(m)')
+        
+        self.fov_item = gl.GLLinePlotItem()
+        self.plot_widget.addItem(self.fov_item)
+        self.fov_item.setData(pos=np.column_stack((x_fov, y_fov, z_fov)), color=(255, 255, 255, 10), width=1)
+        # self.fov_item.setData(pos=np.column_stack((x_fov_left, y_fov_left, z_fov_left)), color=(255, 255, 255, 125), width=1)
+        grid_x = gl.GLGridItem()
+        grid_x.setSize(x=20, y=10, z=4)
+        grid_x.setSpacing(x=1, y=1, z=1)
+        equipHeihgt = EQUIP_HEIGHT
+        grid_x.translate(0,5,-equipHeihgt)
+        self.plot_widget.addItem(grid_x)
 
-        self.ax.set_xlim3d(GRAPH_MIN_X, GRAPH_MAX_X)
-        self.ax.set_ylim3d(0,GRAPH_MAX_Y)
-        self.ax.set_zlim3d(0,GRAPH_MAX_Z)
+        self.plot_widget.setCameraPosition(pos = Vector(0,5,0), distance=15, elevation=20, azimuth=270)
+        
+        layout.addWidget(self.plot_widget)
+        
+        self.colormap = cm.get_cmap('viridis')
 
-        self.ax.set_xticks(np.arange(GRAPH_MIN_X, GRAPH_MAX_X, 1))
-        self.ax.set_yticks(np.arange(GRAPH_MIN_Y, GRAPH_MAX_Y, 1))
-        self.ax.set_zticks(np.arange(GRAPH_MIN_Z, GRAPH_MAX_Z, 1))
+    def writePoint(self, objs):
+        z_normalized = (objs[:,2] - GRAPH_MIN_Z) / (GRAPH_MAX_Z - GRAPH_MIN_Z)
+        colors = self.colormap(z_normalized)
 
-        # scalarmappaple = plt.cm.ScalarMappable(cmap='jet')
-        # scalarmappaple.set_array(range(0,11))
-        # plt.colorbar(scalarmappaple, ax=self.ax, label='Range(m)', location =  'left', shrink=0.4)
-        # self.ax.colorbar(label='Z Value')
-       
-        # Show the plot
-        # pdb.set_trace()
-        # self.writePlot()
-
-    def writePlot(self, objs):
-        if self.scatter != -1:
-            self.clearPlot()
-        cmap_custom = plt.get_cmap('jet')
-        # cmap_custom.set_under(color = 'k', alpha = None)  # Color for values less than vmin
-        # colors = np.where(objs[:,4] == -1, objs[:,3], -1)
-        # pdb.set_trace()
-        colors = np.where(objs[:,4] == -1, 'greenyellow', 'blue')
-        # print(colors)
-        # pdb.set_trace()
-        sizes = np.where(objs[:,4]==-1, 100, 20)
-        # print(colors)
-        # x = np.random.rand(5)
-        # y = np.random.rand(5)
-        # z = np.random.rand(5)
-        # pdb.set_trace()
-        self.scatter = self.ax.scatter(objs[:,0], objs[:,1], objs[:,2], c= colors ,s=sizes, alpha=0.75)
-
-        # self.scatter = self.ax.scatter(objs[:,0], objs[:,1], objs[:,2], c= colors, cmap = cmap_custom ,s=sizes, alpha=0.75)
-        self.canvas.draw()
+        colors[:,3] = 1 #alpha
+        colors[np.where(objs[:,4] == 1)] = [0,0,1,1]
+        colors[np.where(objs[:,4] == -1)] = [0,1,0,1]
+        sizes = np.ones(len(objs))*10
+        sizes[np.where(objs[:,4] == 1)] = 10
+        self.sp.setData(pos=np.column_stack((objs[:,0], objs[:,1], objs[:,2])), color = colors, size = sizes)
         
         self.scatterWrittenFlag = 1
     def clearPlot(self):
