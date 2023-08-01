@@ -32,7 +32,7 @@ class App(QWidget):
     def initUI(self):
         self.algorithm = RadarAlgorithm()
         self.ransac = egoMotionEst()
-        window_size = [1150 + 300, 800]
+        window_size = [1450 + 300, 800]
         # window_size = [1150, 800]
         current_dir = os.path.dirname(os.path.abspath(__file__))
         dir_path = os.path.join(current_dir, '..', 'images', 'movon_img.jpg')
@@ -111,6 +111,12 @@ class App(QWidget):
         self.graph_frame.move(410,60)
         self.graph_frame.setLineWidth(1)
         self.graph_frame.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
+
+        self.dev_frame = QFrame(self)
+        self.dev_frame.setFixedSize(320, 720)
+        self.dev_frame.move(1420,60)
+        self.dev_frame.setLineWidth(1)
+        self.dev_frame.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
 
     # File Load Frame Contents
         self.file_path_line_edit = QLineEdit(self.file_load_frame)
@@ -397,15 +403,15 @@ class App(QWidget):
 
 
     # Graph Frame Contents
-        self.develop_widget1 = QWidget(self.graph_frame)
-        self.develop_widget1.setFixedSize(280,350)
-        self.develop_widget1.move(700, 20)
-        self.develop_widget1.setVisible(False)
+        # self.develop_widget1 = QWidget(self.graph_frame)
+        # self.develop_widget1.setFixedSize(280,350)
+        # self.develop_widget1.move(1430, 20)
+        # self.develop_widget1.setVisible(False)
 
-        self.develop_widget2 = QWidget(self.graph_frame)
-        self.develop_widget2.setFixedSize(280,350)
-        self.develop_widget2.move(700, 370)
-        self.develop_widget2.setVisible(False)
+        # self.develop_widget2 = QWidget(self.graph_frame)
+        # self.develop_widget2.setFixedSize(280,350)
+        # self.develop_widget2.move(1430, 370)
+        # self.develop_widget2.setVisible(False)
 
         self.original_radar_widget = QWidget(self.graph_frame)
         self.original_radar_widget.setFixedSize(690,350)
@@ -434,9 +440,7 @@ class App(QWidget):
         
         self.original_radar_plot = pg.plot()
         self.simulated_radar_plot = pg.plot()
-        self.develop_plot1 = pg.plot()
-        self.develop_plot2 = pg.plot()
-        setPlot(self.develop_plot1)
+        # setPlot(self.develop_plot1)
         
 
         original_radar_plot_menu_item = self.original_radar_plot.plotItem.vb.menu.actions()
@@ -462,8 +466,8 @@ class App(QWidget):
         self.original_radar_plot.setWindowTitle("Movon RADAR")
         self.original_radar_plot.setLabel('left', 'y-axis (meter)')
         self.original_radar_plot.setLabel('bottom', 'x-axis (meter)')
-        drawFOV_XY(self.original_radar_plot, 65)
-        drawFOV_YZ(self.simulated_radar_plot, 16)
+        # drawFOV_XY(self.original_radar_plot, 65)
+        # drawFOV_YZ(self.simulated_radar_plot, 16)
         self.simulated_radar_plot.setWindowTitle("Movon RADAR")
         self.simulated_radar_plot.setLabel('left', 'y-axis (meter)')
         self.simulated_radar_plot.setLabel('bottom', 'x-axis (meter)')
@@ -473,7 +477,7 @@ class App(QWidget):
             self.simulated_radar_plot.setRange(QRectF(EGO_GRAPH_MIN_X, EGO_GRAPH_MIN_Y, EGO_GRAPH_MAX_X-EGO_GRAPH_MIN_X, EGO_GRAPH_MAX_Y-EGO_GRAPH_MIN_Y),disableAutoRange = True)
         else:
             self.simulated_radar_plot.setRange(QRectF(GRAPH_MIN_X, GRAPH_MIN_Y, GRAPH_MAX_X-GRAPH_MIN_X, GRAPH_MAX_Y-GRAPH_MIN_Y),disableAutoRange = True)
-        setPlot(self.simulated_radar_plot, format = "YZ")
+        # setPlot(self.simulated_radar_plot, format = "YZ")
         self.simulated_radar_plot.plotItem.showGrid(True, True, 0.5)
         
 
@@ -491,31 +495,36 @@ class App(QWidget):
 
         self.original_radar_plot.addItem(self.original_scatter)
         self.simulated_radar_plot.addItem(self.simulated_scatter)
-        self.develop_plot1.addItem(self.develop_scatter1)
-        self.develop_plot2.addItem(self.develop_scatter2)
+        # self.develop_plot1.addItem(self.develop_scatter1)
+        # self.develop_plot2.addItem(self.develop_scatter2)
         # self.develop_plot2.addItem(self.develop_plotItem)
 
         self.original_layout = QGridLayout()
         self.simulated_layout = QGridLayout()
-        self.develop_layout1 = QGridLayout()
-        self.develop_layout2 = QGridLayout()
-        self.threeD_layout = QVBoxLayout()
+        # self.develop_layout1 = QGridLayout()
+        # self.develop_layout2 = QGridLayout()
+        # self.threeD_layout = QVBoxLayout()
 
         
         self.original_layout.addWidget(self.original_radar_plot)
         self.simulated_layout.addWidget(self.simulated_radar_plot)
-        self.develop_layout1.addWidget(self.develop_plot1)
-        self.develop_layout2.addWidget(self.develop_plot2)
-        self.threeD_layout.addWidget(self.graph_frame)
+        # self.develop_layout1.addWidget(self.develop_plot1)
+        # self.develop_layout2.addWidget(self.develop_plot2)
+        # self.threeD_layout.addWidget(self.graph_frame)
 
         self.scatter_plot_3d = Scatter3DPlot()
+        
         frame_layout = QVBoxLayout(self.graph_frame)
         frame_layout.addWidget(self.scatter_plot_3d)
+        
+        self.thetaDoppler = ScatterThetaDoppler() 
+        dev_layout = QVBoxLayout(self.dev_frame)
+        dev_layout.addWidget(self.thetaDoppler)
 
         self.original_radar_widget.setLayout(self.original_layout)
         self.simulated_radar_widget.setLayout(self.simulated_layout)
-        self.develop_widget1.setLayout(self.develop_layout1)
-        self.develop_widget2.setLayout(self.develop_layout2)
+        # self.develop_widget1.setLayout(self.develop_layout1)
+        # self.develop_widget2.setLayout(self.develop_layout2)
 
         self.original_graph_info_window = QDialog(self)
         self.original_graph_info_window.setFixedSize(275, 550)
@@ -1193,6 +1202,8 @@ class App(QWidget):
         else:
             flags = []
         # pdb.set_trace()
+        self.thetaDoppler.writePoint(np.array(filteredObjs), np.array(flags))
+        self.thetaDoppler.writeCurve(line_x[:,0], line_y)
         objs3df = np.concatenate((np.array(objs3d), np.array(flags).reshape(-1,1)), axis = 1)
         self.scatter_plot_3d.writePoint(np.array(objs3df))
         
