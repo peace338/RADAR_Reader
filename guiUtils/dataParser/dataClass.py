@@ -5,8 +5,8 @@ RADAR_OBJECT_ATTRIBUTES_LIST = ["range_idx","doppler_idx","range","speed","sin_a
                                 "y","z","rotate_x","rotate_y","vel_disamb_fac_valid",\
                                 "vel_disamb_fac_valid_als","status_flag"]
 RADAR_TRACK_ATTRIBUTES_LIST = ["id","x","y","xd","yd",\
-                                "x_size","y_size","tick","age","flag",\
-                                "reserved0"]
+                                "x_size","y_size","tick","age","z",\
+                                "y_size"]
 SIMULATED_OBJECT_ATTRIBUTES_LIST = ["detID","clusterId","rangeIdx","dopplerIdx","range",\
                                     "speed","sinAzim","rangeVal","rangeSNR","dopplerSNR",\
                                     "angleSNR","x","y","velDisambFacValid","status_flag",\

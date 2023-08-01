@@ -97,14 +97,14 @@ class App(QWidget):
         self.select_frame.move(20,560)
         self.select_frame.setLineWidth(1)
         self.select_frame.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
-        self.select_frame.setVisible(True)
+        self.select_frame.setVisible(False)
 
         self.simulation_frame = QFrame(self)
         self.simulation_frame.setFixedSize(380, 95)
         self.simulation_frame.move(20,685)
         self.simulation_frame.setLineWidth(1)
         self.simulation_frame.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
-        self.simulation_frame.setVisible(True)
+        self.simulation_frame.setVisible(False)
 
         self.graph_frame = QFrame(self)
         self.graph_frame.setFixedSize(1000, 720)
@@ -608,7 +608,7 @@ class App(QWidget):
     #####################################################################################
     def folder_select_btn_event(self):
         tmp_file_name = self.file_path_line_edit.text()
-        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/AMR/20230705_hmc_poc", filter = "Radar Data Bin(*.rdb)")
+        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/AMR/20230723_3tx", filter = "Radar Data Bin(*.rdb)")
         self.no_video_flag = 0
         self.no_video2_flag = 0
         self.no_simulation_data_flag = 0
@@ -1060,17 +1060,17 @@ class App(QWidget):
                 trk = radar_track()
                 read_data = data_payload[ii:(ii+22)]
                 if len(read_data) == 22 :
-                    trk.id                         = (read_data[ 1]*256 + read_data[ 0])
-                    trk.x                          = radar_object.uint2int_16((read_data[ 3]*256 + read_data[ 2]))/Q7_DIVISOR
-                    trk.y                          = radar_object.uint2int_16((read_data[ 5]*256 + read_data[ 4]))/Q7_DIVISOR
-                    trk.xd                         = radar_object.uint2int_16((read_data[ 7]*256 + read_data[ 6]))/Q7_DIVISOR
-                    trk.yd                         = radar_object.uint2int_16((read_data[ 9]*256 + read_data[ 8]))/Q7_DIVISOR
-                    trk.x_size                     = (read_data[11]*256 + read_data[10])/Q7_DIVISOR * 2
-                    trk.y_size                     = (read_data[13]*256 + read_data[12])/Q7_DIVISOR * 2
-                    trk.tick                       = (read_data[15]*256 + read_data[14])
-                    trk.age                        = (read_data[17]*256 + read_data[16])
-                    trk.flag                       = (read_data[19]*256 + read_data[18])
-                    trk.reserved0                  = (read_data[21]*256 + read_data[20])
+                    trk.id                          = (read_data[ 1]*256 + read_data[ 0])
+                    trk.x                           = radar_object.uint2int_16((read_data[ 3]*256 + read_data[ 2]))/Q7_DIVISOR
+                    trk.y                           = radar_object.uint2int_16((read_data[ 5]*256 + read_data[ 4]))/Q7_DIVISOR
+                    trk.xd                          = radar_object.uint2int_16((read_data[ 7]*256 + read_data[ 6]))/Q7_DIVISOR
+                    trk.yd                          = radar_object.uint2int_16((read_data[ 9]*256 + read_data[ 8]))/Q7_DIVISOR
+                    trk.x_size                      = (read_data[11]*256 + read_data[10])/Q7_DIVISOR + 0.2
+                    trk.y_size                      = (read_data[13]*256 + read_data[12])/Q7_DIVISOR + 0.2
+                    trk.tick                        = (read_data[15]*256 + read_data[14])
+                    trk.age                         = (read_data[17]*256 + read_data[16])
+                    trk.z                           = radar_object.uint2int_16((read_data[19]*256 + read_data[18]))/Q7_DIVISOR
+                    trk.z_size                          = radar_object.uint2int_16((read_data[21]*256 + read_data[20]))/Q7_DIVISOR +0.2
                     self.original_track_list.append(trk)
                 ii = ii+22
 
@@ -1187,57 +1187,20 @@ class App(QWidget):
             filteredObjs.append([np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed, obj.doppler_idx])
             objs3d.append([obj.x, obj.y, obj.z, obj.range])
         # if filteredObjs:
-        if filteredObjs:
+        if filteredObjs and ransacFlag:
             # print(len(filteredObjs))
             flags, line_x, line_y, vx, vy = self.ransac(np.array(filteredObjs))
         else:
             flags = []
-        self.remove_boxes(self.original_radar_plot, self.trk_rects)
-        self.trk_rects=[]
         # pdb.set_trace()
         objs3df = np.concatenate((np.array(objs3d), np.array(flags).reshape(-1,1)), axis = 1)
         self.scatter_plot_3d.writePoint(np.array(objs3df))
-
-        for obj, flag in zip(objs, flags) :
-            if flag == 1:
-                # print(obj.sin_azim)
-                obj_dopplerAzim.append({'pos':[np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
-
-                obj_yz.append({'pos':[obj.y, obj.z], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
-                obj_spots.append({'pos':[obj.x, obj.y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
-            else:
-                obj_yz.append({'pos':[obj.y, obj.z], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
-                obj_dopplerAzim.append({'pos':[np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
-                obj_spots.append({'pos':[obj.x, obj.y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
         
         for trk in trks :
-            # tmp = QRect(10,15,20,25)
-            # if 1:
-            #     continue
-            self.trk_rects.append(self.make_boxes(trk.x, trk.y,  trk.x_size + 0.2,  trk.y_size + 0.2, [255,125,0]))
-            # trk_spots.append({'pos':[trk[ii].x, trk[ii].y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
-            #                                 'pen' : (255, 0, 255, 255), 'brush' : (0, 0, 0, 0)})
-            #  'sourceRect' : (trk[ii].x, trk[ii].y, 11,30)
-        
-        # self.original_scatter.clear()
-        # self.simulated_scatter.clear()
-        # self.develop_scatter1.clear()
-        # self.develop_scatter2.clear()
-        # self.simulated_scatter.addPoints(obj_yz)
-        # self.plot_boxes(self.original_radar_plot, self.trk_rects)
-        # if self.original_object_checkbox.isChecked() :
-        #     self.original_scatter.addPoints(obj_spots)
-        # if self.original_track_checkbox.isChecked() :
-        #     # print(trk_spots)
-        #     self.original_scatter.addPoints(trk_spots)
-        
-        # # if self.simulated_object_checkbox.isChecked() :
-        # self.develop_scatter1.addPoints(obj_dopplerAzim)
-        # if (ransacFlag):
-        #     if self.line1 != 0:
-        #         self.remove_curves(self.develop_plot1, self.line1)
-        #     self.line1 = self.plot_curves(self.develop_plot1, line_x[:,0], line_y)
-        # print(speed_num, speed_als_num, len(obj), speed_num/len(obj), speed_als_num/len(obj) )
+
+            trk_spots.append([trk.x, trk.y, trk.z, trk.x_size, trk.y_size, trk.z_size])
+
+        self.scatter_plot_3d.writeCuboid(np.array(trk_spots))
     
     def simulated_graph_update(self, objs, trks) :
         obj_spots=[]
@@ -1441,7 +1404,7 @@ class App(QWidget):
         self.componenet_update()
         self.get_original_radar_data_in_frame(self.radar_current_frame_num, IT_IS_NOT_SIMULATION, 0)       # simulation_flag = 0, radar_num = 0
         # egoDopplerState = self.egomotion_graph_update(self.original_object_list, self.original_track_list)
-        self.algorithm(self.original_object_list)
+        # self.algorithm(self.original_object_list)
         self.original_graph_update(self.original_object_list, self.original_track_list)
         if self.no_simulation_data_flag == 0 :
             self.get_simulated_radar_data_in_frame(self.radar_current_frame_num)
