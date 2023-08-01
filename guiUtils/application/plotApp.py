@@ -22,6 +22,12 @@ class CuboidItem(gl.GLLinePlotItem):
             # pdb.set_trace()
             if start_point[2] < minZ:
                 start_point[2] = minZ
+        
+        if start_point[1] < GRAPH_MIN_Y:
+            start_point[1] = GRAPH_MIN_Y
+        
+        
+
         # start_point = tuple(start_point)
 
         vertices = [
@@ -53,6 +59,9 @@ class GroundRectItem(gl.GLLinePlotItem):
         if minZ is not None:
             start_point[2] = minZ
         # start_point = tuple(start_point)
+        
+        if start_point[1] < GRAPH_MIN_Y:
+            start_point[1] = GRAPH_MIN_Y
 
         vertices = [
             start_point,                                    #0
@@ -75,16 +84,32 @@ class Scatter3DPlot(QWidget):
         self.cuboidWritenFlag = -1
         layout = QVBoxLayout(self)
         self.plot_widget = gl.GLViewWidget()
-        self.sp = gl.GLScatterPlotItem(pos=np.array([[0, 0, 0]]), size=10, color=(1, 0, 0, 0.75))        
-        self.plot_widget.addItem(self.sp)
+
+        assert SCATTER_FRAME > 0
+        self.scatterFrame = SCATTER_FRAME 
+        self.pingpongIdx = 0
+        self.sp = []
+        for i in range(self.scatterFrame):
+            tmp = gl.GLScatterPlotItem(pos=np.array([[0, 0, 0]]), size=10, color=(1, 0, 0, 0.75))   
+            self.sp.append(tmp)
+        # pdb.set_trace()
+        for sp in self.sp:
+            self.plot_widget.addItem(sp)
         
+        x = [ROI_MIN_X, ROI_MAX_X, ROI_MAX_X, ROI_MIN_X, ROI_MIN_X]
+        y = [ROI_MIN_Y, ROI_MIN_Y, ROI_MAX_Y, ROI_MAX_Y, ROI_MIN_Y]
+        z = [-EQUIP_HEIGHT , -EQUIP_HEIGHT, -EQUIP_HEIGHT, -EQUIP_HEIGHT, -EQUIP_HEIGHT]
+
+        self.ROI_item = gl.GLLinePlotItem()
+        self.plot_widget.addItem(self.ROI_item)
+        self.ROI_item.setData(pos=np.column_stack((x, y, z)), color=(255, 255, 255, 10), width=1)
+
         fov_angle = 130
         fov_distance = 10  # FOV distance from the radar position
         fov_rad = np.radians(fov_angle)
         x_fov = [fov_distance * np.sin(-fov_rad / 2), 0, fov_distance * np.sin(fov_rad / 2)]
         y_fov = [fov_distance * np.cos(-fov_rad / 2), 0, fov_distance * np.cos(fov_rad / 2)]
         z_fov = [0 ,0, 0]
-
         
         self.fov_item = gl.GLLinePlotItem()
         self.plot_widget.addItem(self.fov_item)
@@ -104,6 +129,7 @@ class Scatter3DPlot(QWidget):
         self.colormap = cm.get_cmap('jet') # 'plasma'
 
     def writePoint(self, objs):
+        
         z_normalized = (GRAPH_MAX_Y - objs[:,3]) / (GRAPH_MAX_Y - GRAPH_MIN_Y)
         colors = self.colormap(z_normalized)
 
@@ -112,9 +138,13 @@ class Scatter3DPlot(QWidget):
         # colors[np.where(objs[:,4] == -1)] = [0,1,0,1]
         sizes = np.ones(len(objs))*15
         sizes[np.where(objs[:,4] == 1)] = 10
-        self.sp[0].setData(pos=np.column_stack((objs[:,0], objs[:,1], objs[:,2])), color = colors, size = sizes)
+        # pdb.set_trace()
+        self.sp[self.pingpongIdx].setData(pos=np.column_stack((objs[:,0], objs[:,1], objs[:,2])), color = colors, size = sizes)
         
         self.scatterWrittenFlag = 1
+
+        self.pingpongIdx += 1
+        self.pingpongIdx = self.pingpongIdx % self.scatterFrame
 
     def writeCuboid(self, objs):
         self.removeCuboid()
