@@ -90,7 +90,8 @@ class Scatter3DPlot(QWidget):
         self.pingpongIdx = 0
         self.sp = []
         for i in range(self.scatterFrame):
-            tmp = gl.GLScatterPlotItem(pos=np.array([[0, 0, 0]]), size=10, color=(1, 0, 0, 0.75))   
+            tmp = gl.GLScatterPlotItem(pos=np.array([[0, 0, 0]]), size=10, color=(1, 0, 0, 1))
+            tmp.setGLOptions('additive')   
             self.sp.append(tmp)
         # pdb.set_trace()
         for sp in self.sp:
@@ -122,6 +123,30 @@ class Scatter3DPlot(QWidget):
         grid_x.translate(0,5,-equipHeihgt)
         self.plot_widget.addItem(grid_x)
 
+        grid_y = gl.GLGridItem()
+        grid_y.setSize(x=5, y=10, z=4)
+        grid_y.rotate(90,0,1,0)
+        grid_y.setSpacing(x=1, y=1, z=1)
+        equipHeihgt = EQUIP_HEIGHT
+        grid_y.translate(10,5,2.5 - equipHeihgt)
+        self.plot_widget.addItem(grid_y)
+
+        grid_y2 = gl.GLGridItem()
+        grid_y2.setSize(x=5, y=10, z=4)
+        grid_y2.rotate(90,0,1,0)
+        grid_y2.setSpacing(x=1, y=1, z=1)
+
+        grid_y2.translate(-10,5,2.5 - equipHeihgt)
+        self.plot_widget.addItem(grid_y2)
+
+        grid_z = gl.GLGridItem()
+        grid_z.setSize(x=20, y=5, z=4)
+        grid_z.rotate(90,1,0,0)
+        grid_z.setSpacing(x=1, y=1, z=1)
+
+        grid_z.translate(0,10,2.5 - equipHeihgt)
+        self.plot_widget.addItem(grid_z)
+
         self.plot_widget.setCameraPosition(pos = Vector(0,5,0), distance=15, elevation=20, azimuth=270)
         
         layout.addWidget(self.plot_widget)
@@ -133,12 +158,13 @@ class Scatter3DPlot(QWidget):
         z_normalized = (GRAPH_MAX_Y - objs[:,3]) / (GRAPH_MAX_Y - GRAPH_MIN_Y)
         colors = self.colormap(z_normalized)
 
-        colors[:,3] = 0.95 #alpha
-        colors[np.where(objs[:,4] == 1)] = [0,0,1,0.9]
+        colors[:,3] = 1 #alpha
+        colors[np.where(objs[:,4] == 1)] = [0,0,1,1]
         # colors[np.where(objs[:,4] == -1)] = [0,1,0,1]
         sizes = np.ones(len(objs))*15
         sizes[np.where(objs[:,4] == 1)] = 10
         # pdb.set_trace()
+        # print(colors)
         self.sp[self.pingpongIdx].setData(pos=np.column_stack((objs[:,0], objs[:,1], objs[:,2])), color = colors, size = sizes)
         
         self.scatterWrittenFlag = 1
