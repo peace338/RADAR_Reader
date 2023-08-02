@@ -40,7 +40,7 @@ class egoMotionEst_3D():
 
     def __call__(self, objs):
         # print(len(objs))
-        self.clf.fit(_kernelTrick_3D(objs[:,0].reshape(-1,1), objs[:,0].reshape(-1,1)), objs[:,1])
+        self.clf.fit(_kernelTrick_3D(objs[:,0].reshape(-1,1), objs[:,2].reshape(-1,1)), objs[:,1])
         ret = [classifier2(x) for x in self.clf.inlier_mask_]
         line_y = self.clf.predict(_kernelTrick(self.xDomian))
 
