@@ -1211,7 +1211,14 @@ class App(QWidget):
                     ii = ii+44
                 ii=ii+16        # this is for CAN data
 
+    def pruneTarget(self, objs):
+        for obj in objs[:]:
+            # print("gi")
+            if (abs(_getTheta(obj)) > HALF_AZIM_FOV) or (abs(_getPhi(obj)) > HALF_ELEV_FOV) or obj.z < -EQUIP_HEIGHT:
+                # print("go")
+                objs.remove(obj)
 
+        
     def original_graph_update(self, objs, trks) :
         ransacFlag = True
         obj_spots=[]
@@ -1220,20 +1227,21 @@ class App(QWidget):
         filteredObjs = []
         obj_yz = []
         objs3d = []
-        
+        self.pruneTarget(objs)
         for obj in objs :
 
             filteredObjs.append([_getTheta(obj), obj.speed, _getPhi(obj)])
             objs3d.append([obj.x, obj.y, obj.z, obj.range])
         # if filteredObjs:
-        if filteredObjs and ransacFlag:
+        if filteredObjs and ransacFlag and len(objs) > 2:
             # print(len(filteredObjs))
+
             flags, line_x, line_y, vx, vy = self.ransac(np.array(filteredObjs))
+            self.thetaDoppler.writeCurve(line_x[:,0], line_y)
         else:
-            flags = []
+            flags = np.ones(len(objs))
         # pdb.set_trace()
         self.thetaDoppler.writePoint(np.array(filteredObjs), np.array(flags))
-        self.thetaDoppler.writeCurve(line_x[:,0], line_y)
         objs3df = np.concatenate((np.array(objs3d), np.array(flags).reshape(-1,1)), axis = 1)
         self.scatter_plot_3d.writePoint(np.array(objs3df))
         

@@ -166,8 +166,7 @@ class Scatter3DPlot(QWidget):
             # print('remove')
             self.plot_widget.removeItem(item)
         self.cuboidList = []
-
-
+        
 class ScatterThetaDoppler(QWidget):
     def __init__(self):
         super().__init__()
