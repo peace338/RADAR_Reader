@@ -11,18 +11,38 @@ def _kernelTrick(X):
 
     return X
 
+def _kernelTrick_3D(theta, phi):
+
+    theta = theta * np.pi / 180
+    phi = phi * np.pi / 180
+    X = np.concatenate([(-np.sin(theta)*np.cos(phi)).reshape(-1,1), (-np.cos(theta)*np.cos(phi)).reshape(-1,1)], axis=1)
+
+    return X
+
+
 class egoMotionEst():
     def __init__(self):
         self.clf = RANSACRegressor(estimator=LinearRegression(fit_intercept=False, n_jobs=-1), residual_threshold = 0.13, max_trials = 15)
         self.xDomian = np.arange(-90,90,5)[:, np.newaxis]
 
     def __call__(self, objs):
-        idxs = objs[:,0:2]
-        self.clf.fit(_kernelTrick(idxs[:,0].reshape(-1,1)), idxs[:,1])
+        self.clf.fit(_kernelTrick(objs[:,0].reshape(-1,1)), objs[:,1])
         ret = [classifier2(x) for x in self.clf.inlier_mask_]
         line_y = self.clf.predict(_kernelTrick(self.xDomian))
 
         return ret, self.xDomian, line_y, self.clf.estimator_.coef_[0], self.clf.estimator_.coef_[1]
     """ return flags, line_x, line_y, vx of ego, vy of ego """
     
+class egoMotionEst_3D():
+    def __init__(self):
+        self.clf = RANSACRegressor(estimator=LinearRegression(fit_intercept=False, n_jobs=-1), residual_threshold = 0.2, max_trials = 15)
+        self.xDomian = np.arange(-90,90,5)[:, np.newaxis]
+
+    def __call__(self, objs):
+        self.clf.fit(_kernelTrick_3D(objs[:,0].reshape(-1,1), objs[:,0].reshape(-1,1)), objs[:,1])
+        ret = [classifier2(x) for x in self.clf.inlier_mask_]
+        line_y = self.clf.predict(_kernelTrick(self.xDomian))
+
+        return ret, self.xDomian, line_y, self.clf.estimator_.coef_[0], self.clf.estimator_.coef_[1]
+    """ return flags, line_x, line_y, vx of ego, vy of ego """
     

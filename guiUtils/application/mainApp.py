@@ -19,8 +19,34 @@ from ..drawHelper import *
 from .plotApp import *
 from ..dataParser.dataClass import *
 
-from algorithm.radarPerception.egoMotionEstimation import egoMotionEst
+from algorithm.radarPerception.egoMotionEstimation import egoMotionEst, egoMotionEst_3D
 from algorithm.algorithmMain import RadarAlgorithm
+
+def _getPhi(obj):
+
+
+    tmp = obj.z/obj.range
+
+    if tmp > 1 :
+        tmp  =1
+    elif tmp <-1:
+        tmp = -1
+
+    phi = np.arcsin(tmp)
+
+    return phi*180/np.pi
+
+def _getTheta(obj):
+    tmp = obj.x / np.sqrt(obj.x * obj.x + obj.y * obj.y) 
+    if tmp > 1 :
+        tmp  =1
+    elif tmp <-1:
+        tmp = -1
+
+    theta = np.arcsin(tmp)
+
+    return theta*180/np.pi
+
 class App(QWidget):
     def __init__(self):
         super().__init__()
@@ -31,7 +57,8 @@ class App(QWidget):
 #####################################################################################
     def initUI(self):
         self.algorithm = RadarAlgorithm()
-        self.ransac = egoMotionEst()
+        # self.ransac = egoMotionEst()
+        self.ransac = egoMotionEst_3D()
         window_size = [1450 + 300, 800]
         # window_size = [1150, 800]
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -1193,7 +1220,8 @@ class App(QWidget):
         objs3d = []
         
         for obj in objs :
-            filteredObjs.append([np.arcsin(getAzim(obj.sin_azim))*180/np.pi, obj.speed, obj.doppler_idx])
+
+            filteredObjs.append([_getTheta(obj), obj.speed, _getPhi(obj)])
             objs3d.append([obj.x, obj.y, obj.z, obj.range])
         # if filteredObjs:
         if filteredObjs and ransacFlag:
