@@ -22,7 +22,8 @@ from ..dataParser.dataClass import *
 from algorithm.radarPerception.egoMotionEstimation import egoMotionEst, egoMotionEst_3D
 from algorithm.algorithmMain import RadarAlgorithm
 
-def _getPhi(obj):
+"""get Elevation angle in Degree"""
+def _getPhi(obj): #
 
 
     tmp = obj.z/obj.range
@@ -36,7 +37,8 @@ def _getPhi(obj):
 
     return phi*180/np.pi
 
-def _getTheta(obj):
+"""get Azimuth angle in Degree"""
+def _getTheta(obj): #
     tmp = obj.x / np.sqrt(obj.x * obj.x + obj.y * obj.y) 
     if tmp > 1 :
         tmp  =1

@@ -22,7 +22,7 @@ def _kernelTrick_3D(theta, phi):
 
 class egoMotionEst():
     def __init__(self):
-        self.clf = RANSACRegressor(estimator=LinearRegression(fit_intercept=False, n_jobs=-1), residual_threshold = 0.13, max_trials = 15)
+        self.clf = RANSACRegressor(estimator=LinearRegression(fit_intercept=False, n_jobs=-1), residual_threshold = 0.20, max_trials = 15)
         self.xDomian = np.arange(-90,90,5)[:, np.newaxis]
 
     def __call__(self, objs):
@@ -35,7 +35,7 @@ class egoMotionEst():
     
 class egoMotionEst_3D():
     def __init__(self):
-        self.clf = RANSACRegressor(estimator=LinearRegression(fit_intercept=False, n_jobs=-1), residual_threshold = 0.2, max_trials = 15)
+        self.clf = RANSACRegressor(estimator=LinearRegression(fit_intercept=False, n_jobs=-1), residual_threshold = 0.20, max_trials = 15)
         self.xDomian = np.arange(-90,90,5)[:, np.newaxis]
 
     def __call__(self, objs):
