@@ -1242,7 +1242,7 @@ class App(QWidget):
             flags = np.ones(len(objs))
         # pdb.set_trace()
         self.thetaDoppler.writePoint(np.array(filteredObjs), np.array(flags))
-        objs3df = np.concatenate((np.array(objs3d), np.array(flags).reshape(-1,1)), axis = 1)
+        objs3df = np.concatenate((np.array(objs3d).reshape(-1,4), np.array(flags).reshape(-1,1)), axis = 1)
         self.scatter_plot_3d.writePoint(np.array(objs3df))
         
         for trk in trks :
