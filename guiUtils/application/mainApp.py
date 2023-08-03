@@ -6,6 +6,7 @@ from PyQt6.QtGui import *
 from PyQt6.QtMultimedia import *
 from PyQt6.QtMultimediaWidgets import *
 from asyncio.windows_events import NULL
+import numpy as np
 
 import pyqtgraph as pg    
 
@@ -22,6 +23,11 @@ from ..dataParser.dataClass import *
 from algorithm.radarPerception.egoMotionEstimation import egoMotionEst, egoMotionEst_3D
 from algorithm.algorithmMain import RadarAlgorithm
 
+class ClusterIdCount():
+    def __init__(self):
+        self.idList = np.empty()
+    def appendID(self, obj):
+        self.idList.append(obj.ID)
 """get Elevation angle in Degree"""
 def _getPhi(obj): #
 
@@ -61,7 +67,8 @@ class App(QWidget):
         self.algorithm = RadarAlgorithm()
         # self.ransac = egoMotionEst()
         self.ransac = egoMotionEst_3D()
-        window_size = [1450 + 300, 800]
+        # window_size = [1450 + 300, 800]
+        window_size = [1450, 800]
         # window_size = [1150, 800]
         current_dir = os.path.dirname(os.path.abspath(__file__))
         dir_path = os.path.join(current_dir, '..', 'images', 'movon_img.jpg')
@@ -146,7 +153,7 @@ class App(QWidget):
         self.dev_frame.move(1420,60)
         self.dev_frame.setLineWidth(1)
         self.dev_frame.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
-
+        self.dev_frame.setVisible(False)
     # File Load Frame Contents
         self.file_path_line_edit = QLineEdit(self.file_load_frame)
         self.file_path_line_edit.setFixedSize(790,30)
@@ -1214,10 +1221,16 @@ class App(QWidget):
     def pruneTarget(self, objs):
         for obj in objs[:]:
             # print("gi")
-            if (abs(_getTheta(obj)) > HALF_AZIM_FOV) or (abs(_getPhi(obj)) > HALF_ELEV_FOV) or obj.z < -EQUIP_HEIGHT:
+            if (abs(_getTheta(obj)) > HALF_AZIM_FOV) or (abs(_getPhi(obj)) > HALF_ELEV_FOV) or obj.z < -EQUIP_HEIGHT or obj.z > ROI_MAX_Z:
                 # print("go")
                 objs.remove(obj)
 
+    def pruneTargetWithClusterNum(self, objs):
+        for obj in objs[:]:
+            # print("gi")
+            if (abs(_getTheta(obj)) > HALF_AZIM_FOV) or (abs(_getPhi(obj)) > HALF_ELEV_FOV) or obj.z < -EQUIP_HEIGHT or obj.z > ROI_MAX_Z:
+                # print("go")
+                objs.remove(obj)
         
     def original_graph_update(self, objs, trks) :
         ransacFlag = True

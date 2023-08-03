@@ -101,9 +101,23 @@ class Scatter3DPlot(QWidget):
         y = [ROI_MIN_Y, ROI_MIN_Y, ROI_MAX_Y, ROI_MAX_Y, ROI_MIN_Y]
         z = [-EQUIP_HEIGHT , -EQUIP_HEIGHT, -EQUIP_HEIGHT, -EQUIP_HEIGHT, -EQUIP_HEIGHT]
 
-        self.ROI_item = gl.GLLinePlotItem()
-        self.plot_widget.addItem(self.ROI_item)
-        self.ROI_item.setData(pos=np.column_stack((x, y, z)), color=(255, 255, 255, 10), width=1)
+        ROI_item = gl.GLLinePlotItem()
+        self.plot_widget.addItem(ROI_item)
+        ROI_item.setData(pos=np.column_stack((x, y, z)), color=(255, 255, 255, 10), width=1)
+
+        x = [GRAPH_MIN_X, GRAPH_MAX_X, GRAPH_MAX_X, GRAPH_MIN_X, GRAPH_MIN_X]
+        y = [GRAPH_MIN_Y, GRAPH_MIN_Y, GRAPH_MAX_Y, GRAPH_MAX_Y, GRAPH_MIN_Y]
+        z = [-EQUIP_HEIGHT , -EQUIP_HEIGHT, -EQUIP_HEIGHT, -EQUIP_HEIGHT, -EQUIP_HEIGHT]
+        ROI_item = gl.GLLinePlotItem()
+        self.plot_widget.addItem(ROI_item)
+        ROI_item.setData(pos=np.column_stack((x, y, z)), color=(255, 255, 255, 10), width=1)
+
+        x = [GRAPH_MAX_X, GRAPH_MAX_X, GRAPH_MIN_X, GRAPH_MIN_X]
+        y = [GRAPH_MAX_Y, GRAPH_MAX_Y, GRAPH_MAX_Y, GRAPH_MAX_Y]
+        z = [5-EQUIP_HEIGHT, -EQUIP_HEIGHT, -EQUIP_HEIGHT, 5-EQUIP_HEIGHT]
+        ROI_item = gl.GLLinePlotItem()
+        self.plot_widget.addItem(ROI_item)
+        ROI_item.setData(pos=np.column_stack((x, y, z)), color=(255, 255, 255, 10), width=1)
 
         fov_angle = 130
         fov_distance = 10  # FOV distance from the radar position
@@ -112,6 +126,8 @@ class Scatter3DPlot(QWidget):
         y_fov = [fov_distance * np.cos(-fov_rad / 2), 0, fov_distance * np.cos(fov_rad / 2)]
         z_fov = [0 ,0, 0]
         
+        
+                              
         self.fov_item = gl.GLLinePlotItem()
         self.plot_widget.addItem(self.fov_item)
         self.fov_item.setData(pos=np.column_stack((x_fov, y_fov, z_fov)), color=(255, 255, 255, 10), width=1)
@@ -152,16 +168,21 @@ class Scatter3DPlot(QWidget):
         layout.addWidget(self.plot_widget)
         
         self.colormap = cm.get_cmap('jet') # 'plasma'
-
+        
+        # bar = pg.ColorBarItem( values= (0, 10), cmap=self.colormap )
+        # layout.addWd(bar)
     def writePoint(self, objs):
         
         z_normalized = (GRAPH_MAX_Y - objs[:,3]) / (GRAPH_MAX_Y - GRAPH_MIN_Y)
         colors = self.colormap(z_normalized)
 
+        # z_normalized = (GRAPH_MAX_Z - objs[:,2]) / (GRAPH_MAX_Z - GRAPH_MIN_Z)
+        # colors = self.colormap(z_normalized)
+
         colors[:,3] = 1 #alpha
         colors[np.where(objs[:,4] == 1)] = [0,0,1,1]
         # colors[np.where(objs[:,4] == -1)] = [0,1,0,1]
-        sizes = np.ones(len(objs))*15
+        sizes = np.ones(len(objs))*13
         sizes[np.where(objs[:,4] == 1)] = 10
         # pdb.set_trace()
         # print(colors)

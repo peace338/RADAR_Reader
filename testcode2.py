@@ -1,27 +1,30 @@
-import matplotlib.pyplot as plt
+import sys
 import numpy as np
+import pyqtgraph.opengl as gl
+from PyQt6.QtWidgets import QApplication
+from pyqtgraph.Qt import QtCore, QtGui
+from pyqtgraph.graphicsItems.GradientEditorItem import ColorBarItemWidget
+from pyqtgraph import ColorMap
 
-# Sample data points
-x = np.random.rand(50)
-y = np.random.rand(50)
-z = np.random.randint(-10, 11, size=50)  # z values range from -10 to 10
+class ColorMapBarApp(QtGui.QWidget):
+    def __init__(self):
+        super().__init__()
 
-# Create a 3D Axes object
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
+        self.setWindowTitle("Color Map Bar Example")
+        self.resize(800, 600)
 
-# Plot the 3D scatter plot with colormap 'plasma'
-scatter = ax.scatter(x, y, z, c=z, cmap='plasma', edgecolors='k')
+        layout = QtGui.QVBoxLayout(self)
 
-# Set labels for the axes
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_zlabel('Z')
+        # 컬러 맵 생성
+        colors = [(0.0, (0, 0, 255, 255)), (1.0, (255, 0, 0, 255))]  # 파란색 -> 빨간색
+        cmap = ColorMap(pos=[x[0] for x in colors], color=[x[1] for x in colors])
 
-# Create a separate ScalarMappable object for the colorbar
-scalarmappaple = plt.cm.ScalarMappable(cmap='plasma')
-scalarmappaple.set_array(range(0,10))
-cbar = plt.colorbar(scalarmappaple, ax=ax, label='Z Value')
+        # 컬러 맵 바 생성
+        colormap_bar = ColorBarItemWidget(cmap.getLookupTable(), label='Z Value', width=20, height=200)
+        layout.addWidget(colormap_bar)
 
-plt.title('3D Scatter Plot with Colorbar and Fixed Grid Size')
-plt.show()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    colormap_bar_app = ColorMapBarApp()
+    colormap_bar_app.show()
+    sys.exit(app.exec())
