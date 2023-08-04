@@ -169,6 +169,9 @@ class Scatter3DPlot(QWidget):
         
         self.colormap = cm.get_cmap('jet') # 'plasma'
         
+        item = CuboidItem((np.array([0,-0.1,0]) - np.array([0.1,0.05,0.05])/2), (np.array([0,-0.05,0]) + np.array([0.1,0.05,0.05])/2), color = (1,1,1,1), width = 1, minZ = -EQUIP_HEIGHT)
+        self.plot_widget.addItem(item)
+
         # bar = pg.ColorBarItem( values= (0, 10), cmap=self.colormap )
         # layout.addWd(bar)
     def writePoint(self, objs):
