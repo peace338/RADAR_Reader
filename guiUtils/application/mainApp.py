@@ -12,8 +12,6 @@ import pyqtgraph as pg
 
 import cv2
 
-import pdb
-# pdb.set_trace()
 from ..guiConsts import *
 from ..guiConfigure import *
 from ..drawHelper import *
@@ -23,37 +21,14 @@ from ..dataParser.dataClass import *
 from algorithm.radarPerception.egoMotionEstimation import egoMotionEst, egoMotionEst_3D
 from algorithm.algorithmMain import RadarAlgorithm
 from algorithm.radarConfigure.configManager_MRR_DEMO import *
+from algorithm.utils import *
+
 class ClusterIdCount():
     def __init__(self):
         self.idList = np.empty()
     def appendID(self, obj):
         self.idList.append(obj.ID)
 """get Elevation angle in Degree"""
-def _getPhi(obj): #
-
-
-    tmp = obj.z/obj.range
-
-    if tmp > 1 :
-        tmp  =1
-    elif tmp <-1:
-        tmp = -1
-
-    phi = np.arcsin(tmp)
-
-    return phi*180/np.pi
-
-"""get Azimuth angle in Degree"""
-def _getTheta(obj): #
-    tmp = obj.x / np.sqrt(obj.x * obj.x + obj.y * obj.y) 
-    if tmp > 1 :
-        tmp  =1
-    elif tmp <-1:
-        tmp = -1
-
-    theta = np.arcsin(tmp)
-
-    return theta*180/np.pi
 
 class App(QWidget):
     def __init__(self):
@@ -72,7 +47,7 @@ class App(QWidget):
         # window_size = [1150, 800]
         current_dir = os.path.dirname(os.path.abspath(__file__))
         dir_path = os.path.join(current_dir, '..', 'images', 'movon_img.jpg')
-        # pdb.set_trace()
+
         self.radar_file_name = []
         self.video_file_name = []
         self.file_name_load_flag = 0
@@ -1217,20 +1192,6 @@ class App(QWidget):
                         self.simulated_track_list.append(trk)
                     ii = ii+44
                 ii=ii+16        # this is for CAN data
-
-    def pruneTarget(self, objs):
-        for obj in objs[:]:
-            # print("gi")
-            if (abs(_getTheta(obj)) > HALF_AZIM_FOV) or (abs(_getPhi(obj)) > HALF_ELEV_FOV) or obj.z < -EQUIP_HEIGHT or obj.z > ROI_MAX_Z:
-                # print("go")
-                objs.remove(obj)
-
-    def pruneTargetWithClusterNum(self, objs):
-        for obj in objs[:]:
-            # print("gi")
-            if (abs(_getTheta(obj)) > HALF_AZIM_FOV) or (abs(_getPhi(obj)) > HALF_ELEV_FOV) or obj.z < -EQUIP_HEIGHT or obj.z > ROI_MAX_Z:
-                # print("go")
-                objs.remove(obj)
         
     def original_graph_update(self, objs, trks) :
         ransacFlag = True
@@ -1240,10 +1201,10 @@ class App(QWidget):
         filteredObjs = []
         obj_yz = []
         objs3d = []
-        self.pruneTarget(objs)
+        objs = pruneTarget(objs)
         for obj in objs :
 
-            filteredObjs.append([_getTheta(obj), obj.speed, _getPhi(obj)])
+            filteredObjs.append([getTheta(obj), obj.speed, getPhi(obj)])
             objs3d.append([obj.x, obj.y, obj.z, obj.range])
         # if filteredObjs:
         if filteredObjs and ransacFlag and len(objs) > 2:
@@ -1253,7 +1214,7 @@ class App(QWidget):
             self.thetaDoppler.writeCurve(line_x[:,0], line_y)
         else:
             flags = np.ones(len(objs))
-        # pdb.set_trace()
+
         self.thetaDoppler.writePoint(np.array(filteredObjs), np.array(flags))
         objs3df = np.concatenate((np.array(objs3d).reshape(-1,4), np.array(flags).reshape(-1,1)), axis = 1)
         self.scatter_plot_3d.writePoint(np.array(objs3df))

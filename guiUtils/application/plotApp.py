@@ -5,7 +5,6 @@ from PyQt6.QtMultimedia import *
 from PyQt6.QtMultimediaWidgets import *
 from pyqtgraph import Vector
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-import matplotlib.pyplot as plt
 
 import pyqtgraph as pg   
 from ..guiConfigure import *
@@ -13,13 +12,11 @@ import numpy as np
 
 import pyqtgraph.opengl as gl
 from matplotlib import cm
-import pdb
 
 class CuboidItem(gl.GLLinePlotItem):
     def __init__(self, start_point, end_point, color=(1, 0, 1, 1), width=1, minZ = None):
 
         if minZ is not None:
-            # pdb.set_trace()
             if start_point[2] < minZ:
                 start_point[2] = minZ
         
@@ -93,7 +90,7 @@ class Scatter3DPlot(QWidget):
             tmp = gl.GLScatterPlotItem(pos=np.array([[0, 0, 0]]), size=10, color=(1, 0, 0, 1))
             tmp.setGLOptions('additive')   
             self.sp.append(tmp)
-        # pdb.set_trace()
+
         for sp in self.sp:
             self.plot_widget.addItem(sp)
         
@@ -179,16 +176,12 @@ class Scatter3DPlot(QWidget):
         z_normalized = (GRAPH_MAX_Y - objs[:,3]) / (GRAPH_MAX_Y - GRAPH_MIN_Y)
         colors = self.colormap(z_normalized)
 
-        # z_normalized = (GRAPH_MAX_Z - objs[:,2]) / (GRAPH_MAX_Z - GRAPH_MIN_Z)
-        # colors = self.colormap(z_normalized)
-
         colors[:,3] = 1 #alpha
         colors[np.where(objs[:,4] == 1)] = [0,0,1,1]
-        # colors[np.where(objs[:,4] == -1)] = [0,1,0,1]
+
         sizes = np.ones(len(objs))*13
         sizes[np.where(objs[:,4] == 1)] = 10
-        # pdb.set_trace()
-        # print(colors)
+
         self.sp[self.pingpongIdx].setData(pos=np.column_stack((objs[:,0], objs[:,1], objs[:,2])), color = colors, size = sizes)
         
         self.scatterWrittenFlag = 1
