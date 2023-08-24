@@ -275,69 +275,6 @@ class trackingCfg(config, rangeBasedPruningCfg):
 	distanceLimit = 1.42 		# 정확도 30% (No Use)
 	multiplier = 2.5			# (No Use)
 
-
-class trackingCfgSEW(config, rangeBasedPruningCfg):
-	max_detect_range_x = 40								# HSLee 추가 2022.01.21
-	maxTracker = 50					# (30) --> 50
-
-	associateGamma = 16.5 	# 정확도 90%				# (16.5)
-	rangeAssocThresh = 4.0  # unit m					# (4.0)
-	velAssocThresh = 2.5  # unit m/s					# (2.5)
-	xAssocThresh = 3.0									# (3.0)
-	yAssocThresh = 3.0  								# (3.0)
-	azimAssocThresh = np.sin(20 * np.pi / 180)			# (20)
-
-#	distAssocThreshSq = 1.65  	# unit m^2, original Value
-	td = MRRchirpCfg.td 		# unit sec, 15frame
-
-	HIGH_SNR_RVAR_THRESH = 6
-	TRK_SIN_AZIM_THRESH = 1 / 256  # @brief We discard objects with poor azimuth SNR from the tracking procedure. */
-	maxAge = 10
-	maxTick = 40
-	minTick = 0
-	thresholdTick = 18			# (18)
-	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=np.float)
-
-	CV_xVariance = 1.0			# (0.1) --> (1.0)
-	CV_yVariance = 4.0			# (4.0) --> (4.0)
-	CA_xVariance = 2.0			# (2.0) --> (2.0)
-	CA_yVariance = 1.0			# (0.1) --> (1.0)
-
-	distanceLimit = 1.42 		# 정확도 30% (No Use)
-	multiplier = 2.5			# (No Use)
-
-
-class trackingCfgRCCW(config, rangeBasedPruningCfg):
-	max_detect_range_x = 40								# HSLee 추가 2022.01.21
-	maxTracker = 50					# (30) --> 50
-
-	associateGamma = 16.5 	# 정확도 90%				# (16.5)
-	rangeAssocThresh = 4.0  # unit m					# (4.0)
-	velAssocThresh = 3.0   # unit m/s					# (3.0)
-	xAssocThresh = 4.0									# (4.0)
-	yAssocThresh = 4.0  								# (4.0)
-	azimAssocThresh = np.sin(20 * np.pi / 180)			# (20)
-
-#	distAssocThreshSq = 1.65  	# unit m^2, original Value
-	td = MRRchirpCfg.td 		# unit sec, 15frame
-
-	HIGH_SNR_RVAR_THRESH = 6
-	TRK_SIN_AZIM_THRESH = 1 / 256  # @brief We discard objects with poor azimuth SNR from the tracking procedure. */
-	maxAge = 10
-	maxTick = 40
-	minTick = 0
-	thresholdTick = 18			# (18) --> 20
-	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=np.float)
-
-	CV_xVariance = 1.0			# (0.1) --> (1.0)
-	CV_yVariance = 4.0			# (4.0) --> (4.0)
-	CA_xVariance = 2.0			# (2.0) --> (2.0)
-	CA_yVariance = 1.0			# (0.1) --> (1.0)
-
-	distanceLimit = 1.42 		# 정확도 30% (No Use)
-	multiplier = 2.5			# (No Use)
-
-
 class ROIpruneCfg:
 	xScale = 10
 	roadHalfSize = 7

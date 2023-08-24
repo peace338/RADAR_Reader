@@ -118,6 +118,10 @@ def _clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain)
 			if tmpSize > tmpClusterOutput.ySize:
 				tmpClusterOutput.ySize = tmpSize
 
+			tmpSize = abs(obj.z - tmpClusterOutput.zCenter)
+			if tmpSize > tmpClusterOutput.zSize:
+				tmpClusterOutput.zSize = tmpSize
+
 			if obj.rangeVal >= peakVal:
 				peakVal = obj.rangeVal
 				tmpClusterOutput.strongestMember = obj
@@ -246,6 +250,7 @@ def _clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain)
 		if CONST.trackingInputMODIFY:
 			tmpClusterOutput.trackingInput.stateVectorXYZ[0] = tmpClusterOutput.xCenter
 			tmpClusterOutput.trackingInput.stateVectorXYZ[1] = tmpClusterOutput.yCenter
+			tmpClusterOutput.trackingInput.z = tmpClusterOutput.zCenter
 			if CONST.SPEED_COMP_BY_ANGLE:
 				compang_rad = math.atan2(tmpClusterOutput.xCenter, tmpClusterOutput.yCenter)
 				tmpClusterOutput.trackingInput.stateVectorXYZ[2] = trackingInputSpeedAvg * np.sin(compang_rad)
@@ -294,18 +299,12 @@ def _clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, Radar
 		sumB = (b * b) / (clusteringCfg.ellipsoidB*clusteringCfg.ellipsoidB)
 		sumC = (c * c) / (clusteringCfg.ellipsoidC*clusteringCfg.ellipsoidC)
 		sumD = (d * d) / (clusteringCfg.ellipsoidD*clusteringCfg.ellipsoidD)
-		if clusteringCfg.isGuardRail == False:
-			if (sumA < epsilon2WithSpeed) and (sumB < epsilon2WithSpeed) and (sumC < epsilon2WithSpeed):
-				if compObj.scope:
-					continue
-				tempCluster.append(compObj)
-				neighCount += 1
-		else:
-			if (sumA + sumB + sumC) < 1:
-				if compObj.scope:
-					continue
-				tempCluster.append(compObj)
-				neighCount += 1
+
+		if (sumA + sumB + sumC) < 1:
+			if compObj.scope:
+				continue
+			tempCluster.append(compObj)
+			neighCount += 1
 
 	return tempCluster, neighCount
 

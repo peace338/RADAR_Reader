@@ -196,14 +196,14 @@ class Scatter3DPlot(QWidget):
         self.pingpongIdx += 1
         self.pingpongIdx = self.pingpongIdx % self.scatterFrame
 
-    def writeCuboid(self, objs):
-        self.removeCuboid()
+    def writeCuboid(self, objs, c = (1,0,1,1)):
+        
         for obj in objs:
-            item = CuboidItem((obj[:3] - obj[3:]/2), (obj[:3] + obj[3:]/2), color = (1,0,1,1), width = 1, minZ = -EQUIP_HEIGHT)
+            item = CuboidItem((obj[:3] - obj[3:]/2), (obj[:3] + obj[3:]/2), color = c, width = 1, minZ = -EQUIP_HEIGHT)
             self.cuboidList.append(item)
             self.plot_widget.addItem(item)
             
-            item = GroundRectItem((obj[:3] - obj[3:]/2), (obj[:3] + obj[3:]/2), color = (1,0,1,0.8), width = 1, minZ = -EQUIP_HEIGHT)
+            item = GroundRectItem((obj[:3] - obj[3:]/2), (obj[:3] + obj[3:]/2), color = c, width = 1, minZ = -EQUIP_HEIGHT)
             self.cuboidList.append(item)
             self.plot_widget.addItem(item)
         self.cuboidWritenFlag = 1

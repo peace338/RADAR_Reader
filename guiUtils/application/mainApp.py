@@ -22,7 +22,7 @@ from ..dataParser.dataClass import *
 
 from algorithm.radarPerception.egoMotionEstimation import egoMotionEst, egoMotionEst_3D
 from algorithm.algorithmMain import RadarAlgorithm
-
+from algorithm.radarConfigure.configManager_MRR_DEMO import *
 class ClusterIdCount():
     def __init__(self):
         self.idList = np.empty()
@@ -133,7 +133,7 @@ class App(QWidget):
         self.select_frame.move(20,560)
         self.select_frame.setLineWidth(1)
         self.select_frame.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Sunken)
-        self.select_frame.setVisible(False)
+        self.select_frame.setVisible(True)
 
         self.simulation_frame = QFrame(self)
         self.simulation_frame.setFixedSize(380, 95)
@@ -1264,65 +1264,26 @@ class App(QWidget):
 
         self.scatter_plot_3d.writeCuboid(np.array(trk_spots))
     
-    def simulated_graph_update(self, objs, trks) :
-        obj_spots=[]
-        trk_spots=[]
-        filteredObjs = []
-        obj_dopplerAzim = []
-        for obj in objs :
-            filteredObjs.append([np.arcsin(getAzim(obj.sinAzim))*180/np.pi, obj.speed, obj.dopplerIdx])
-        if filteredObjs:
-            flags, line_x, line_y, vx, vy = ransac_cos(np.array(filteredObjs))
-            print("vx : {:8.2f}m/s, vy : {:8.2f}m/s".format(vx, vy))
-            if self.velocity_text != 0:
-                self.develop_plot2.removeItem(self.velocity_text)
-            self.velocity_text = pg.TextItem(text = "vx : {:8.2f}m/s, vy : {:8.2f}m/s".format(vx, vy))
-            
-            self.develop_plot2.addItem(self.velocity_text)
-            self.velocity_text.setPos(-90,-4)
-            self.velocity_text
-        else:
-            flags = []
-        # trk_candidate_spots=[]
-        for obj, flag in zip(objs, flags) :
-            if flag == 1:
-                # print(obj.sin_azim)
-                obj_dopplerAzim.append({'pos':[np.arcsin(getAzim(obj.sinAzim))*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
-                obj_spots.append({'pos':[obj.x, obj.y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (125,125,255,255), 'data': 1})
-            else:
-                obj_dopplerAzim.append({'pos':[np.arcsin(getAzim(obj.sinAzim))*180/np.pi, obj.speed], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
-                obj_spots.append({'pos':[obj.x, obj.y], 'size' : 5, 'pen' : (0, 0, 0, 0), 'brush' : (0,255,0,255), 'data': 1})
-        
-        self.remove_boxes(self.simulated_radar_plot, self.trk_rects_sim)
-        self.trk_rects_sim=[]
-        
+    def simulated_graph_update(self, trks) :
+        trk_spots = []
         for trk in trks :
-            if trk.plotValidity :
-                # trk_spots.append({'pos':[trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y], 'size' : 20, 'symbol' : 'd', 'data': 2, \
-                #                             'pen' : (255,0,255, 255), 'brush' : (0,0,0,0)})
-                
-                self.trk_rects_sim.append(self.make_boxes(trk.statVecXYZ_x, trk.statVecXYZ_y,  trk.xSize*2 + 0.2,  trk.ySize*2 + 0.2, [255,0,255]))
-            # else :
-            #     trk_candidate_spots.append({'pos':[trk[ii].statVecXYZ_x, trk[ii].statVecXYZ_y],'data': 2})
-                
-        # self.simulated_scatter.clear()
-        # self.develop_scatter2.clear()
-        # # self.develop_plotItem.clear()
-        # self.plot_boxes(self.simulated_radar_plot, self.trk_rects_sim)
-        # if self.simulated_object_checkbox.isChecked() :
-        #     self.simulated_scatter.addPoints(obj_spots, brush=(255,0,0,255))
-        # if self.simulated_track_checkbox.isChecked() :
-        #     self.simulated_scatter.addPoints(trk_spots, brush=(255,255,255,255))
-        # # if self.simulated_candidate_checkbox.isChecked() :
-        # #     self.simulated_scatter.addPoints(trk_candidate_spots, brush=(0,255,0,255))
-        # self.develop_scatter2.addPoints(obj_dopplerAzim)
-        # if self.line2 != 0:
-        #     self.remove_curves(self.develop_plot2, self.line2)
-        # self.line2 = self.plot_curves(self.develop_plot2, line_x[:,0], line_y)
-        #     self.line.clear()
-        # self.line = self.develop_plot2.plot(line_x[:,0], line_y)
-        # print(line_x[:,0])
-        # self.develop_plotItem.addLine(pg.plot(x = line_x[:,0], y = line_y))
+            # breakpoint()
+            
+            if trk.plotValidity == False:
+                continue
+            if trk.tick < trackingCfg().thresholdTick :
+                continue
+            if trk.age > trackingCfg().maxAge :
+                continue
+            if trk.stateVectorXYZ[1] < 0:
+                continue
+
+            trk_spots.append([trk.stateVectorXYZ[0], trk.stateVectorXYZ[1], trk.z, trk.xSize*2 + 0.2, trk.ySize*2 + 0.2, trk.zSize*2 + 0.2])
+
+
+        self.scatter_plot_3d.writeCuboid(np.array(trk_spots), c = (0,1,0,1))
+
+    
     def enable_all_components(self, onoff) :
         self.previous_frame_btn.setEnabled(onoff)
         self.play_btn.setEnabled(onoff)                   # under-construction
@@ -1466,11 +1427,14 @@ class App(QWidget):
         self.componenet_update()
         self.get_original_radar_data_in_frame(self.radar_current_frame_num, IT_IS_NOT_SIMULATION, 0)       # simulation_flag = 0, radar_num = 0
         # egoDopplerState = self.egomotion_graph_update(self.original_object_list, self.original_track_list)
-        # self.algorithm(self.original_object_list)
+        self.scatter_plot_3d.removeCuboid()
         self.original_graph_update(self.original_object_list, self.original_track_list)
-        if self.no_simulation_data_flag == 0 :
-            self.get_simulated_radar_data_in_frame(self.radar_current_frame_num)
-            self.simulated_graph_update(self.simulated_object_list, self.simulated_track_list)
+        
+        if self.simulated_track_checkbox.isChecked():
+            processedOutTracker = self.algorithm(self.original_object_list)
+            self.simulated_graph_update(processedOutTracker)
+
+        
         if (self.video_current_frame_num >= self.video_end_frame_num) :
             self.update_video_frame(self.video_end_frame_num-1)
         elif (self.video_current_frame_num < 0) :

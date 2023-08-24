@@ -20,7 +20,8 @@ class RadarAlgorithm():
         self.egoMotionEstimator = egoMotionEst()
         self.clusteringAlg = Clustering(self.clusterCfg, self.resList, domain, self.RadarInfo)
         self.trackingAlg = Tracking()
-    
+        self.tracker = None
+        
     def __call__(self, objList):
         # pdb.set_trace()
         objs3d = []
@@ -31,14 +32,14 @@ class RadarAlgorithm():
         flags, _,_,_,_ = self.egoMotionEstimator(objs3d)
         
         assert len(objs3d) ==  len(objList)
-
+        assert len(objs3d) ==  len(newObjList)
         for newObj, flag in zip(newObjList, flags):
             newObj.status = flag
         
         _, clusterOutputList =self.clusteringAlg(newObjList)
 
         measList = populateTrackingList(clusterOutputList)
-        self.trackingAlg(measList)
+        self.tracker = self.trackingAlg(measList)
 
         return self.trackingAlg.getTracker()
 

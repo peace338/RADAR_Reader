@@ -185,7 +185,7 @@ class trackingInput:
 		self.xSize = 0
 		self.ySize = 0
 		self.zSize = 0
-		
+		self.z = 0
 		self.validity = False  # Target Out validity tick이 10점을 넘으면 이후로 계속 플롯
 
 		self.associatedObj = None
