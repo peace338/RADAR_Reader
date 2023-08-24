@@ -1222,8 +1222,8 @@ class App(QWidget):
         for trk in trks :
 
             trk_spots.append([trk.x, trk.y, trk.z, trk.x_size, trk.y_size, trk.z_size])
-
-        self.scatter_plot_3d.writeCuboid(np.array(trk_spots))
+        if self.original_track_checkbox.isChecked():
+            self.scatter_plot_3d.writeCuboid(np.array(trk_spots))
     
     def simulated_graph_update(self, trks) :
         trk_spots = []
