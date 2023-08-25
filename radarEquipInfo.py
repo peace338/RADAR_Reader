@@ -2,8 +2,18 @@
 #   EQUIP_INFO    radar equip inforamtion                                           #
 #####################################################################################
 
-HALF_AZIM_FOV = 65
-HALF_ELEV_FOV = 40
+'''
+# equip height of the radar from the ground. 
+# I assume the LOS of radar is parallel to the ground.
+'''
+EQUIP_HEIGHT = 0.6 
 
-EQUIP_HEIGHT = 0.6
-MAX_HEIGHT = 3.0
+
+
+'''
+Interested azim FOV. object out of this region will be removed.
+And removed object will not be used as the input of algorithm emulator.
+'''
+AZIM_FOV = 130 
+ELEV_FOV = 80 
+MAX_HEIGHT = 3.0 

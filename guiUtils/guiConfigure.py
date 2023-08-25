@@ -1,4 +1,4 @@
-from radarEquipInfo import EQUIP_HEIGHT, HALF_AZIM_FOV, HALF_ELEV_FOV, MAX_HEIGHT
+from radarEquipInfo import EQUIP_HEIGHT, AZIM_FOV, ELEV_FOV, MAX_HEIGHT
 
 #####################################################################################
 #   Constants - for User. User can modify the values freely                         #
@@ -28,8 +28,8 @@ ROI_MAX_Y = 5
 ROI_MIN_Z = -EQUIP_HEIGHT
 ROI_MAX_Z = ROI_MIN_Z + MAX_HEIGHT
 
-HALF_AZIM_FOV = HALF_AZIM_FOV
-HALF_ELEV_FOV = HALF_ELEV_FOV
+HALF_AZIM_FOV = AZIM_FOV / 2
+HALF_ELEV_FOV = ELEV_FOV / 2
 
 
 
