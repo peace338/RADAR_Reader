@@ -1,5 +1,5 @@
 numRx = 4
-numTx = 2
+numTx = 3
 
 SampleRate = 5209e3  # unit SPS(Sample per seconds) / PROFILE_MRR_DIGOUT_SAMPLERATE_VAL *e3     (5447e3)
 numADCSamples = 256  # unit None / PROFILE_MRR_ADC_SAMPLE_VAL                                   (512)
@@ -19,5 +19,5 @@ carrierFreq = 77.0e9  # Unit Hz /PROFILE_MRR_START_FREQ_GHZ *e9
 
 td = 0.06666666 #unit sec, 15frame
 
-numOfBurst = 2
+numOfBurst = 1
 numOfSubFrame = 1
