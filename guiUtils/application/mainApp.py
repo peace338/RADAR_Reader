@@ -6,6 +6,7 @@ from PyQt6.QtGui import *
 from PyQt6.QtMultimedia import *
 from PyQt6.QtMultimediaWidgets import *
 from asyncio.windows_events import NULL
+
 import numpy as np
 
 import pyqtgraph as pg    
