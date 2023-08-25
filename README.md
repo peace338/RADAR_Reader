@@ -7,17 +7,18 @@
 주요 기능으로는 저장된 데이터를 3차원 공간에 출력하는 것과 `.rdb` 파일의 object data를 통해 perception algorithm을 emulation 하는 것이다.
 
 
-## 2. 필요한 package
+## 2. 동작 환경
 
 ```
+python 3.8.10
+OS : window
+
 pip install pyqt6
-
 pip install pyqtgraph
-
-pip install numpy 
-
+pip install numpy==1.22.3
 pip install opencv-python
-
+pip install scikit-learn==1.3.0
+pip install PyOpenGL
 ...
 
 ```

@@ -1208,15 +1208,16 @@ class App(QWidget):
             filteredObjs.append([getTheta(obj), obj.speed, getPhi(obj)])
             objs3d.append([obj.x, obj.y, obj.z, obj.range])
         # if filteredObjs:
-        if filteredObjs and ransacFlag and len(objs) > 2:
-            # print(len(filteredObjs))
 
-            flags, line_x, line_y, vx, vy = self.ransac(np.array(filteredObjs))
-            self.thetaDoppler.writeCurve(line_x[:,0], line_y)
-        else:
-            flags = np.ones(len(objs))
+
+        flags, line_x, line_y, vx, vy = self.ransac(np.array(filteredObjs))
+        
+        '''
+        TODO 
+        self.thetaDoppler.writeCurve(line_x[:,0], line_y)
 
         self.thetaDoppler.writePoint(np.array(filteredObjs), np.array(flags))
+        '''
         objs3df = np.concatenate((np.array(objs3d).reshape(-1,4), np.array(flags).reshape(-1,1)), axis = 1)
         self.scatter_plot_3d.writePoint(np.array(objs3df))
         
