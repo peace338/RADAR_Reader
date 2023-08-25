@@ -4,7 +4,7 @@
 ## 1. 프로젝트 개요
 
 본 코드는 Movon RADAR Unit으로부터 취득한 `.rdb` 파일과 video 파일을 처리하는 프로그램이다. 
-주요 기능으로는 저장된 데이터를 3차원 공간에 출력하는 것과 `.rdb` 파일의 object data를 통해 perception algorithm(Perception algorithm)을 emulation 하는 것이다.
+주요 기능으로는 저장된 데이터를 3차원 공간에 출력하는 것과 `.rdb` 파일의 object data를 통해 perception algorithm을 emulation 하는 것이다.
 
 
 ## 2. 필요한 package
