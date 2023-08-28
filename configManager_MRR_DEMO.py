@@ -187,45 +187,7 @@ class clusterCfgMRR(config):
 	ellipsoidA = 3.0				# X축: (2.0) --> 3.0
 	ellipsoidB = 1.5				# Y축: (1.0) --> 1.5
 	ellipsoidC = 3.0				# 속도: (3.0)
-
-
-class clusterCfgSEW(config):
-	isGuardRail = False
-	maxCluster = 50				# (30)
-	if CONST.CLUSTER_MIN_POINT_MODIFY:
-		minPointsInCluster = 2					# (2)
-	else:
-		minPointsInCluster = 1
-	dBScanNeighbourLim = 4
-
-	ellipsoidA = 2.0				# X축: (2.0)
-	ellipsoidB = 2.0				# Y축: (2.0)
-	ellipsoidC = 4.0				# 속도: (4.0)
-
-
-class clusterCfgRCCW(config):
-	isGuardRail = False
-	maxCluster = 50				# (30)
-	if CONST.CLUSTER_MIN_POINT_MODIFY:
-		minPointsInCluster = 2					# (2)
-	else:
-		minPointsInCluster = 1
-	dBScanNeighbourLim = 4
-
-	ellipsoidA = 3.0				# X축: (3.0)
-	ellipsoidB = 3.0				# Y축: (3.0)
-	ellipsoidC = 3.0				# 속도: (3.0)
-
-
-class clusterCfgGuardRail(config):
-	isGuardRail = True
-	maxCluster = 50
-	minPointsInCluster = 1
-
-	ellipsoidA = 4.0				# X축: (4.0)
-	ellipsoidB = 0.5				# Y축: (0.5)
-	ellipsoidC = 100.0				# 속도: (100.0)
-
+	ellipsoidD = 0.5
 
 class rangeBasedPruningCfg():
 	if cfarCfgRange.pruningType == "pruneToPeaksOrNeighbourOfPeaks" or cfarCfgRange.pruningType == "pruneToPeaksOr2NeighbourOfPeaks":

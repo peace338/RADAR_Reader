@@ -4331,7 +4331,8 @@ def conversion(object_list, RadarInfo, vehicle_speed, vehicle_steer_angle):
 		tmpObj.angleSNR = obj.sin_azim_srn_lin
 		tmpObj.x = obj.x
 		tmpObj.y = obj.y
-
+		tmpObj.z = obj.z
+		
 		tmpObj.rotatex = obj.rotate_x
 		tmpObj.rotatey = obj.rotate_y
 

@@ -74,6 +74,7 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 			for obj in cluster:
 				tmpClusterOutput.xCenter += obj.x
 				tmpClusterOutput.yCenter += obj.y
+				tmpClusterOutput.zCenter += obj.z
 				tmpClusterOutput.avgVel += obj.speed
 
 				# Cente of Mass
@@ -88,6 +89,7 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 
 			tmpClusterOutput.xCenter = tmpClusterOutput.xCenter / clusterLength
 			tmpClusterOutput.yCenter = tmpClusterOutput.yCenter / clusterLength
+			tmpClusterOutput.zCenter = tmpClusterOutput.zCenter / clusterLength
 			tmpClusterOutput.avgVel  = tmpClusterOutput.avgVel / clusterLength
 
 			trackingInputRangeAvg   = np.sqrt(tmpClusterOutput.xCenter*tmpClusterOutput.xCenter + tmpClusterOutput.yCenter * tmpClusterOutput.yCenter)
@@ -98,10 +100,12 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 			for obj in cluster:  # obj Type : cfarOutFmt3D
 				tmpClusterOutput.xCenter += obj.x
 				tmpClusterOutput.yCenter += obj.y
+				tmpClusterOutput.zCenter += obj.z
 				tmpClusterOutput.avgVel += obj.speed
 
 			tmpClusterOutput.xCenter = tmpClusterOutput.xCenter / lengthOfCluster
 			tmpClusterOutput.yCenter = tmpClusterOutput.yCenter / lengthOfCluster
+			tmpClusterOutput.zCenter = tmpClusterOutput.zCenter / lengthOfCluster
 			tmpClusterOutput.avgVel = tmpClusterOutput.avgVel / lengthOfCluster
 
 		peakVal = 0
@@ -114,6 +118,10 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 			if tmpSize > tmpClusterOutput.ySize:
 				tmpClusterOutput.ySize = tmpSize
 
+			tmpSize = abs(obj.z - tmpClusterOutput.zCenter)
+			if tmpSize > tmpClusterOutput.zSize:
+				tmpClusterOutput.zSize = tmpSize
+
 			if obj.rangeVal >= peakVal:
 				peakVal = obj.rangeVal
 				tmpClusterOutput.strongestMember = obj
@@ -121,18 +129,22 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 			if (tmpClusterOutput.xSize == 0) or (tmpClusterOutput.ySize == 0):
 				tmpClusterOutput.xSize = 1 * resList[0]
 				tmpClusterOutput.ySize = 1 * resList[0]
+				tmpClusterOutput.zSize = 1 * resList[0]
 			else:
 				tmpClusterOutput.xSize += 0.5 * resList[0]
 				tmpClusterOutput.ySize += 0.5 * resList[0]
+				tmpClusterOutput.zSize += 0.5 * resList[0]
 		else:
 			if (tmpClusterOutput.xSize == 0) or (tmpClusterOutput.ySize == 0):
 				tmpClusterOutput.xSize = 3 * resList[0]
 				tmpClusterOutput.ySize = 3 * resList[0]
+				tmpClusterOutput.zSize = 3 * resList[0]
 
 		# ======================================================================================================================================================
 		# populate trackingInput from tmpClusterOutput.strongestMember
 		tmpClusterOutput.trackingInput.xSize = tmpClusterOutput.xSize
 		tmpClusterOutput.trackingInput.ySize = tmpClusterOutput.ySize
+		tmpClusterOutput.trackingInput.zSize = tmpClusterOutput.zSize
 
 		# ======================================================================================================================================================
 		if CONST.trackingInputMODIFY:
@@ -238,6 +250,7 @@ def clusteringDBscan_calcInfoFixed(clusterList, resList, clusteringCfg, domain):
 		if CONST.trackingInputMODIFY:
 			tmpClusterOutput.trackingInput.stateVectorXYZ[0] = tmpClusterOutput.xCenter
 			tmpClusterOutput.trackingInput.stateVectorXYZ[1] = tmpClusterOutput.yCenter
+			tmpClusterOutput.trackingInput.z = tmpClusterOutput.zCenter
 			if CONST.SPEED_COMP_BY_ANGLE:
 				compang_rad = math.atan2(tmpClusterOutput.xCenter, tmpClusterOutput.yCenter)
 				tmpClusterOutput.trackingInput.stateVectorXYZ[2] = trackingInputSpeedAvg * np.sin(compang_rad)
@@ -267,43 +280,31 @@ def clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, RadarI
 	for compObj in objList:
 		if compObj.visited:
 			continue
-
-		if clusteringCfg.isGuardRail == False:
-			if abs(currObj.speed - compObj.speed) > clusteringCfg.ellipsoidC:
-				continue
-
-			### Object Flag 적용
-			if RadarInfo.mode == 2:
-				if (currObj.statusFlag & 7) != (compObj.statusFlag & 7):
-					continue
-			### Object Flag 적용
-
-		if abs(currObj.rotatex - compObj.rotatex) > clusteringCfg.ellipsoidA:
+		
+		if abs(currObj.speed - compObj.speed) > clusteringCfg.ellipsoidC:
 			continue
 
-		if abs(currObj.rotatey - compObj.rotatey) > clusteringCfg.ellipsoidB:
+		if abs(currObj.x - compObj.x) > clusteringCfg.ellipsoidA:
 			continue
 
-		a = currObj.rotatex - compObj.rotatex
-		b = currObj.rotatey - compObj.rotatey
+		if abs(currObj.y - compObj.y) > clusteringCfg.ellipsoidB:
+			continue
+
+		a = currObj.x - compObj.x
+		b = currObj.y - compObj.y
 		c = currObj.speed - compObj.speed
+		d = currObj.z - compObj.z
 
 		sumA = (a * a) / (clusteringCfg.ellipsoidA*clusteringCfg.ellipsoidA)
 		sumB = (b * b) / (clusteringCfg.ellipsoidB*clusteringCfg.ellipsoidB)
 		sumC = (c * c) / (clusteringCfg.ellipsoidC*clusteringCfg.ellipsoidC)
+		sumD = (d * d) / (clusteringCfg.ellipsoidD*clusteringCfg.ellipsoidD)
 
-		if clusteringCfg.isGuardRail == False:
-			if (sumA < epsilon2WithSpeed) and (sumB < epsilon2WithSpeed) and (sumC < epsilon2WithSpeed):
-				if compObj.scope:
-					continue
-				tempCluster.append(compObj)
-				neighCount += 1
-		else:
-			if (sumA < epsilon2WithSpeed) and (sumB < epsilon2WithSpeed):
-				if compObj.scope:
-					continue
-				tempCluster.append(compObj)
-				neighCount += 1
+		if (sumA + sumB + sumC) < 1:
+			if compObj.scope:
+				continue
+			tempCluster.append(compObj)
+			neighCount += 1
 
 	return tempCluster, neighCount
 

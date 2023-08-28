@@ -263,6 +263,8 @@ def imm_ekfRun(measList, trackingList, trackingCfg, frameNumber, RadarInfo):
 				if CONST.SIZE_OSCILLATION:
 					currTrack.xSize = (15 * currTrack.xSize + currTrack.associatedObj.xSize) / 16
 					currTrack.ySize = (15 * currTrack.ySize + currTrack.associatedObj.ySize) / 16
+					currTrack.zSize = (15 * currTrack.zSize + currTrack.associatedObj.zSize) / 16
+					currTrack.z = (15 * currTrack.z + currTrack.associatedObj.z) / 16
 				else:
 					currTrack.xSize = (7 * currTrack.xSize + currTrack.associatedObj.xSize) / 8
 					currTrack.ySize = (7 * currTrack.ySize + currTrack.associatedObj.ySize) / 8
