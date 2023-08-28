@@ -2,6 +2,7 @@ import numpy as np
 import dataStructure as DT
 import CONST
 import math
+from radarEquipInfo import MAX_Z, MIN_Z
 
 DEBUG = False
 
@@ -280,7 +281,13 @@ def clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, RadarI
 	for compObj in objList:
 		if compObj.visited:
 			continue
-		
+
+		if ((currObj.z) > MAX_Z):
+			continue
+        
+		if ((currObj.z) < MIN_Z):
+			continue
+        
 		if abs(currObj.speed - compObj.speed) > clusteringCfg.ellipsoidC:
 			continue
 
@@ -288,6 +295,9 @@ def clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, RadarI
 			continue
 
 		if abs(currObj.y - compObj.y) > clusteringCfg.ellipsoidB:
+			continue
+		
+		if abs(currObj.z - compObj.z) > clusteringCfg.ellipsoidD:
 			continue
 
 		a = currObj.x - compObj.x

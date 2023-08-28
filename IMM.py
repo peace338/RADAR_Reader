@@ -12,6 +12,7 @@ import clusteringTmp as CL
 import plot_data as pltd
 import logOut as lg
 import math
+from radarEquipInfo import MAX_Z, MIN_Z
 
 N_MEAS = 3
 N_STATE = 4

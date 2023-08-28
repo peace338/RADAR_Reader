@@ -9,7 +9,7 @@ import IMM
 import configManager_MRR_DEMO as cfg
 import sys
 import math
-
+from radarEquipInfo import MAX_Z, MIN_Z
 # from numpy.linalg import inv
 N_STATES = 4
 if CONST.ADD_ANGLE_VEL:
@@ -3382,16 +3382,12 @@ def populateTrackingList(clusterOutputList, ThresholdY, RadarInfo):
 			clusterX = cluster.strongestMember.x
 			clusterY = cluster.strongestMember.y
 
-		if (clusterNum == 1) and (-0.8 <= clusterX) and (clusterX <= 0.5) and (1.5 <= clusterY) and (clusterY <= 2.5):
-			continue
-		### HSLee 추가 2022.10.28 : Radar 전방 2[m] Clutter 제거
 
-		### HSLee 추가 2022.09.16
-		Deg2_rad = RadarInfo.angle * np.pi / 180
-		rotateY = -clusterX * np.sin(Deg2_rad) + clusterY * np.cos(Deg2_rad)
-		if (RadarInfo.mode == 1) and (rotateY >= (ThresholdY - 0.2)):
+		if cluster.trackingInput.z > MAX_Z:
 			continue
-		### HSLee 추가 2022.09.16
+
+		if cluster.trackingInput.z < MIN_Z:
+			continue
 
 		tmpTrackingList.append(cluster.trackingInput)
 	
@@ -4332,7 +4328,7 @@ def conversion(object_list, RadarInfo, vehicle_speed, vehicle_steer_angle):
 		tmpObj.x = obj.x
 		tmpObj.y = obj.y
 		tmpObj.z = obj.z
-		
+
 		tmpObj.rotatex = obj.rotate_x
 		tmpObj.rotatey = obj.rotate_y
 
