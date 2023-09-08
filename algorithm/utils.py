@@ -31,7 +31,7 @@ def pruneTarget(objs):
     
     for obj in objs[:]:
         # print("gi")
-        if (abs(getTheta(obj)) > AZIM_FOV/2) or (abs(getPhi(obj)) > ELEV_FOV/2) or obj.z < -MIN_Z or obj.z > MAX_Z:
+        if (abs(getTheta(obj)) > AZIM_FOV/2) or (abs(getPhi(obj)) > ELEV_FOV/2) or obj.z < MIN_Z or obj.z > MAX_Z:
             # breakpoint()
             # print("delete")
             objs.remove(obj)
