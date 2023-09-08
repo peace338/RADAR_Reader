@@ -13,17 +13,15 @@
 python 3.8.10
 OS : window
 
-pip install pyqt6
-pip install pyqtgraph
+pip install pyqt6==13.5.1
+pip install pyqtgraph==0.13.3
 pip install numpy==1.22.3
-pip install opencv-python
+pip install opencv-python==4.7.0.72
 pip install scikit-learn==1.3.0
-pip install PyOpenGL
+pip install PyOpenGL==3.1.5
 ...
 
 ```
-
-버전 호환은 체크하지 못함.
 
 ## 3. File Structure
 
