@@ -50,7 +50,7 @@ class RadarAlgorithm():
         measList = populateTrackingList(clusterOutputList)
         self.tracker = self.trackingAlg(measList)
 
-        return self.trackingAlg.getTracker()
+        return newObjList, self.trackingAlg.getTracker()
 
     def parsing(self, objList):
         cfarOut3DList = conversion(objList, self.RadarInfo, 0, 0, self.resList)
