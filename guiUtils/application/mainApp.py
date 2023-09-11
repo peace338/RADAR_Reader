@@ -1227,7 +1227,7 @@ class App(QWidget):
         if self.original_track_checkbox.isChecked():
             self.scatter_plot_3d.writeCuboid(np.array(trk_spots))
     
-    def simulated_graph_update(self, trks) :
+    def emulated_trks_update(self, trks) :
         trk_spots = []
         for trk in trks :
             # breakpoint()
@@ -1246,6 +1246,26 @@ class App(QWidget):
 
         self.scatter_plot_3d.writeCuboid(np.array(trk_spots), c = (0,1,0,1))
 
+    def emulated_objs_update(self, objs) :
+        objs3d = []
+        flags = []
+        # objs = pruneTarget(objs)
+        for obj in objs :
+            flags.append(obj.status)
+            objs3d.append([obj.x, obj.y, obj.z, obj.range])
+        # if filteredObjs:
+
+
+        # flags, line_x, line_y, vx, vy = self.ransac(np.array(filteredObjs))
+        
+        '''
+        TODO 
+        self.thetaDoppler.writeCurve(line_x[:,0], line_y)
+
+        self.thetaDoppler.writePoint(np.array(filteredObjs), np.array(flags))
+        '''
+        objs3df = np.concatenate((np.array(objs3d).reshape(-1,4), np.array(flags).reshape(-1,1)), axis = 1)
+        self.scatter_plot_3d.writePoint(np.array(objs3df))
     
     def enable_all_components(self, onoff) :
         self.previous_frame_btn.setEnabled(onoff)
@@ -1391,11 +1411,12 @@ class App(QWidget):
         self.get_original_radar_data_in_frame(self.radar_current_frame_num, IT_IS_NOT_SIMULATION, 0)       # simulation_flag = 0, radar_num = 0
         # egoDopplerState = self.egomotion_graph_update(self.original_object_list, self.original_track_list)
         self.scatter_plot_3d.removeCuboid()
-        self.original_graph_update(self.original_object_list, self.original_track_list)
+        # self.original_graph_update(self.original_object_list, self.original_track_list)
         
         if self.simulated_track_checkbox.isChecked():
-            processedOutTracker = self.algorithm(self.original_object_list)
-            self.simulated_graph_update(processedOutTracker)
+            processedOutObjects, processedOutTracker = self.algorithm(self.original_object_list)
+            self.emulated_objs_update(processedOutObjects)
+            self.emulated_trks_update(processedOutTracker)
 
         
         if (self.video_current_frame_num >= self.video_end_frame_num) :

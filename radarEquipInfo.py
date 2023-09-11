@@ -6,7 +6,9 @@
 # equip height of the radar from the ground. 
 # I assume the LOS of radar is parallel to the ground.
 '''
-EQUIP_HEIGHT = 0.6
+
+EQUIP_HEIGHT = 1.0 
+
 
 
 
