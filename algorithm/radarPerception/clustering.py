@@ -2,7 +2,7 @@ import numpy as np
 import algorithm.dataStructure as DT
 import algorithm.radarConfigure.CONST as CONST
 import math
-
+from radarEquipInfo import MAX_Z, MIN_Z
 DEBUG = False
 
 def _convertSNRdBToVar(SNRdB, n_samples, resolution):
@@ -281,6 +281,12 @@ def _clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, Radar
 		if compObj.visited:
 			continue
 		
+		if currObj.z > MAX_Z:
+			continue
+		
+		if currObj.z < MIN_Z:
+			continue
+
 		if abs(currObj.speed - compObj.speed) > clusteringCfg.ellipsoidC:
 			continue
 
@@ -289,7 +295,10 @@ def _clusteringDBscan_findNeighbors2Fixed(objList, currObj, clusteringCfg, Radar
 
 		if abs(currObj.y - compObj.y) > clusteringCfg.ellipsoidB:
 			continue
-
+		
+		if abs(currObj.z - compObj.z) > clusteringCfg.ellipsoidD:
+			continue
+		
 		a = currObj.x - compObj.x
 		b = currObj.y - compObj.y
 		c = currObj.speed - compObj.speed

@@ -629,7 +629,7 @@ class App(QWidget):
     #####################################################################################
     def folder_select_btn_event(self):
         tmp_file_name = self.file_path_line_edit.text()
-        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/AMR/20230723_3tx", filter = "Radar Data Bin(*.rdb)")
+        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/MOIS/20230908_thresh8/", filter = "Radar Data Bin(*.rdb)")
         self.no_video_flag = 0
         self.no_video2_flag = 0
         self.no_simulation_data_flag = 0

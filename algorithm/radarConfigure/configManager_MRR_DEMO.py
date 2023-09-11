@@ -186,45 +186,8 @@ class clusterCfgMRR(config):
 
 	ellipsoidA = 0.5				# X축: (2.0) --> 3.0
 	ellipsoidB = 0.5				# Y축: (1.0) --> 1.5
-	ellipsoidC = 1.0				# 속도: (3.0)
-	ellipsoidD = 0.5
-
-class clusterCfgSEW(config):
-	isGuardRail = False
-	maxCluster = 50				# (30)
-	if CONST.CLUSTER_MIN_POINT_MODIFY:
-		minPointsInCluster = 2					# (2)
-	else:
-		minPointsInCluster = 1
-	dBScanNeighbourLim = 4
-
-	ellipsoidA = 0.5				# X축: (2.0)
-	ellipsoidB = 0.5				# Y축: (2.0)
-	ellipsoidC = 1.0				# 속도: (4.0)
-
-
-class clusterCfgRCCW(config):
-	isGuardRail = False
-	maxCluster = 50				# (30)
-	if CONST.CLUSTER_MIN_POINT_MODIFY:
-		minPointsInCluster = 2					# (2)
-	else:
-		minPointsInCluster = 1
-	dBScanNeighbourLim = 4
-
-	ellipsoidA =  0.5				# X축: (3.0)
-	ellipsoidB =  0.5				# Y축: (3.0)
-	ellipsoidC =  1.0				# 속도: (3.0)
-
-
-class clusterCfgGuardRail(config):
-	isGuardRail = True
-	maxCluster = 50
-	minPointsInCluster = 1
-
-	ellipsoidA =  0.5				# X축: (4.0)
-	ellipsoidB =  0.5				# Y축: (0.5)
-	ellipsoidC =  1.0				# 속도: (100.0)
+	ellipsoidC = 0.5				# 속도: (3.0)
+	ellipsoidD = 2.0
 
 
 class rangeBasedPruningCfg():
@@ -268,9 +231,9 @@ class trackingCfg(config, rangeBasedPruningCfg):
 	transitionProb = np.array([[0.99, 0.01], [0.01, 0.99]], dtype=np.float)
 
 	CV_xVariance = 1.0			# (0.1) --> (1.0)
-	CV_yVariance = 1.0			# (4.0) --> (4.0)
-	CA_xVariance = 3.0			# (2.0) --> (2.0)
-	CA_yVariance = 3.0			# (0.1) --> (1.0)
+	CV_yVariance = 4.0			# (4.0) --> (4.0)
+	CA_xVariance = 2.0			# (2.0) --> (2.0)
+	CA_yVariance = 1.0			# (0.1) --> (1.0)
 
 	distanceLimit = 1.42 		# 정확도 30% (No Use)
 	multiplier = 2.5			# (No Use)

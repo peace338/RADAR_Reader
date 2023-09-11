@@ -10,6 +10,7 @@ from .radarConfigure import configManager_MRR_DEMO as cfg
 import sys
 import math
 
+from radarEquipInfo import MAX_Z, MIN_Z
 # from numpy.linalg import inv
 N_STATES = 4
 if CONST.ADD_ANGLE_VEL:
@@ -3442,20 +3443,13 @@ def pruneTrackingInput(measList, aoaCfg, trackingCfg, vehicleSpeed):
 	vehicleSpeedFlt = vehicleSpeed / 3.6
 	for trackInput in measList[:]:
 
-		condition = ((abs(trackInput.measVectorRRD[2]) < aoaCfg.SIN_55_DEGREES)\
-			or (trackInput.measCovVec[2] < trackingCfg.TRK_SIN_AZIM_THRESH))
+		# condition = ((abs(trackInput.measVectorRRD[2]) < aoaCfg.SIN_55_DEGREES)\
+		# 	or (trackInput.measCovVec[2] < trackingCfg.TRK_SIN_AZIM_THRESH))
 #		    and ( trackInput.measVectorRRD[1] < 0.0 )
 
+		condition = (trackInput.zCenter < MIN_Z) or (trackInput.zCenter > MAX_Z)
 		if condition:
-			if CONST.pruneTrackingInputDEBUG:
-				print("point",trackInput.measVectorRRD,"is not removed in pruneTrackingInput.")
-				print("measCovVec", trackInput.measCovVec)
-		else:
-			if CONST.pruneTrackingInputDEBUG:
-				print("point",trackInput.measVectorRRD,"is removed in pruneTrackingInput.")
-				print("measCovVec", trackInput.measCovVec)
 			measList.remove(trackInput)
-			# print("deleted")
 			del(trackInput)
 
 	return measList
