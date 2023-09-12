@@ -16,7 +16,7 @@ EQUIP_HEIGHT = 1.0
 Interested azim FOV. object out of this region will be removed.
 And removed object will not be used as the input of algorithm emulator.
 '''
-AZIM_FOV = 180 
+AZIM_FOV = 160 
 ELEV_FOV = 80 
 MAX_HEIGHT = 3.0 
 

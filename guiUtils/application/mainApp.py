@@ -1194,13 +1194,9 @@ class App(QWidget):
                     ii = ii+44
                 ii=ii+16        # this is for CAN data
         
-    def original_graph_update(self, objs, trks) :
-        ransacFlag = True
-        obj_spots=[]
-        trk_spots=[]
-        obj_dopplerAzim = []
+    def original_objs_update(self, objs) :
+
         filteredObjs = []
-        obj_yz = []
         objs3d = []
         objs = pruneTarget(objs)
         for obj in objs :
@@ -1221,12 +1217,16 @@ class App(QWidget):
         objs3df = np.concatenate((np.array(objs3d).reshape(-1,4), np.array(flags).reshape(-1,1)), axis = 1)
         self.scatter_plot_3d.writePoint(np.array(objs3df))
         
+    def original_trks_update(self, trks) :
+
+        trk_spots=[]
+        
         for trk in trks :
 
             trk_spots.append([trk.x, trk.y, trk.z, trk.x_size, trk.y_size, trk.z_size])
-        if self.original_track_checkbox.isChecked():
-            self.scatter_plot_3d.writeCuboid(np.array(trk_spots))
     
+        self.scatter_plot_3d.writeCuboid(np.array(trk_spots))
+
     def emulated_trks_update(self, trks) :
         trk_spots = []
         for trk in trks :
@@ -1251,7 +1251,7 @@ class App(QWidget):
         flags = []
         # objs = pruneTarget(objs)
         for obj in objs :
-            flags.append(obj.status)
+            flags.append([obj.status, obj.clusterId])
             objs3d.append([obj.x, obj.y, obj.z, obj.range])
         # if filteredObjs:
 
@@ -1264,7 +1264,7 @@ class App(QWidget):
 
         self.thetaDoppler.writePoint(np.array(filteredObjs), np.array(flags))
         '''
-        objs3df = np.concatenate((np.array(objs3d).reshape(-1,4), np.array(flags).reshape(-1,1)), axis = 1)
+        objs3df = np.concatenate((np.array(objs3d).reshape(-1,4), np.array(flags).reshape(-1,2)), axis = 1)
         self.scatter_plot_3d.writePoint(np.array(objs3df))
     
     def enable_all_components(self, onoff) :
@@ -1411,11 +1411,13 @@ class App(QWidget):
         self.get_original_radar_data_in_frame(self.radar_current_frame_num, IT_IS_NOT_SIMULATION, 0)       # simulation_flag = 0, radar_num = 0
         # egoDopplerState = self.egomotion_graph_update(self.original_object_list, self.original_track_list)
         self.scatter_plot_3d.removeCuboid()
+        processedOutObjects, processedOutTracker = self.algorithm(self.original_object_list)
+        self.emulated_objs_update(processedOutObjects)
+        if self.original_track_checkbox.isChecked():
+            self.original_trks_update(self.original_track_list)
         # self.original_graph_update(self.original_object_list, self.original_track_list)
         
         if self.simulated_track_checkbox.isChecked():
-            processedOutObjects, processedOutTracker = self.algorithm(self.original_object_list)
-            self.emulated_objs_update(processedOutObjects)
             self.emulated_trks_update(processedOutTracker)
 
         
