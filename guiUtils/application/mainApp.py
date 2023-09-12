@@ -19,10 +19,10 @@ from ..drawHelper import *
 from .plotApp import *
 from ..dataParser.dataClass import *
 
-from algorithm.radarPerception.egoMotionEstimation import egoMotionEst, egoMotionEst_3D
-from algorithm.algorithmMain import RadarAlgorithm
-from algorithm.radarConfigure.configManager_MRR_DEMO import *
-from algorithm.utils import *
+from RADAR_Algorithm.radarPerception.egoMotionEstimation import egoMotionEst, egoMotionEst_3D
+from RADAR_Algorithm.algorithmMain import RadarAlgorithm
+from RADAR_Algorithm.radarConfigure.configManager_MRR_DEMO import *
+from RADAR_Algorithm.utils import *
 
 class ClusterIdCount():
     def __init__(self):
@@ -629,7 +629,7 @@ class App(QWidget):
     #####################################################################################
     def folder_select_btn_event(self):
         tmp_file_name = self.file_path_line_edit.text()
-        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/AMR/20230723_3tx", filter = "Radar Data Bin(*.rdb)")
+        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/MOIS/20230908_thresh8/", filter = "Radar Data Bin(*.rdb)")
         self.no_video_flag = 0
         self.no_video2_flag = 0
         self.no_simulation_data_flag = 0
@@ -1194,13 +1194,9 @@ class App(QWidget):
                     ii = ii+44
                 ii=ii+16        # this is for CAN data
         
-    def original_graph_update(self, objs, trks) :
-        ransacFlag = True
-        obj_spots=[]
-        trk_spots=[]
-        obj_dopplerAzim = []
+    def original_objs_update(self, objs) :
+
         filteredObjs = []
-        obj_yz = []
         objs3d = []
         objs = pruneTarget(objs)
         for obj in objs :
@@ -1221,13 +1217,17 @@ class App(QWidget):
         objs3df = np.concatenate((np.array(objs3d).reshape(-1,4), np.array(flags).reshape(-1,1)), axis = 1)
         self.scatter_plot_3d.writePoint(np.array(objs3df))
         
+    def original_trks_update(self, trks) :
+
+        trk_spots=[]
+        
         for trk in trks :
 
             trk_spots.append([trk.x, trk.y, trk.z, trk.x_size, trk.y_size, trk.z_size])
-        if self.original_track_checkbox.isChecked():
-            self.scatter_plot_3d.writeCuboid(np.array(trk_spots))
     
-    def simulated_graph_update(self, trks) :
+        self.scatter_plot_3d.writeCuboid(np.array(trk_spots))
+
+    def emulated_trks_update(self, trks) :
         trk_spots = []
         for trk in trks :
             # breakpoint()
@@ -1246,6 +1246,26 @@ class App(QWidget):
 
         self.scatter_plot_3d.writeCuboid(np.array(trk_spots), c = (0,1,0,1))
 
+    def emulated_objs_update(self, objs) :
+        objs3d = []
+        flags = []
+        # objs = pruneTarget(objs)
+        for obj in objs :
+            flags.append([obj.status, obj.clusterId])
+            objs3d.append([obj.x, obj.y, obj.z, obj.range])
+        # if filteredObjs:
+
+
+        # flags, line_x, line_y, vx, vy = self.ransac(np.array(filteredObjs))
+        
+        '''
+        TODO 
+        self.thetaDoppler.writeCurve(line_x[:,0], line_y)
+
+        self.thetaDoppler.writePoint(np.array(filteredObjs), np.array(flags))
+        '''
+        objs3df = np.concatenate((np.array(objs3d).reshape(-1,4), np.array(flags).reshape(-1,2)), axis = 1)
+        self.scatter_plot_3d.writePoint(np.array(objs3df))
     
     def enable_all_components(self, onoff) :
         self.previous_frame_btn.setEnabled(onoff)
@@ -1391,11 +1411,14 @@ class App(QWidget):
         self.get_original_radar_data_in_frame(self.radar_current_frame_num, IT_IS_NOT_SIMULATION, 0)       # simulation_flag = 0, radar_num = 0
         # egoDopplerState = self.egomotion_graph_update(self.original_object_list, self.original_track_list)
         self.scatter_plot_3d.removeCuboid()
-        self.original_graph_update(self.original_object_list, self.original_track_list)
+        processedOutObjects, processedOutTracker = self.algorithm(self.original_object_list)
+        self.emulated_objs_update(processedOutObjects)
+        if self.original_track_checkbox.isChecked():
+            self.original_trks_update(self.original_track_list)
+        # self.original_graph_update(self.original_object_list, self.original_track_list)
         
         if self.simulated_track_checkbox.isChecked():
-            processedOutTracker = self.algorithm(self.original_object_list)
-            self.simulated_graph_update(processedOutTracker)
+            self.emulated_trks_update(processedOutTracker)
 
         
         if (self.video_current_frame_num >= self.video_end_frame_num) :

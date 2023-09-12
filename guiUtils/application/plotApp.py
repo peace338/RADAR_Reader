@@ -13,6 +13,7 @@ import numpy as np
 import pyqtgraph.opengl as gl
 from matplotlib import cm
 
+from radarEquipInfo import AZIM_FOV
 class CuboidItem(gl.GLLinePlotItem):
     def __init__(self, start_point, end_point, color=(1, 0, 1, 1), width=1, minZ = None):
 
@@ -116,7 +117,7 @@ class Scatter3DPlot(QWidget):
         self.plot_widget.addItem(ROI_item)
         ROI_item.setData(pos=np.column_stack((x, y, z)), color=(255, 255, 255, 10), width=1)
 
-        fov_angle = 130
+        fov_angle = AZIM_FOV
         fov_distance = 10  # FOV distance from the radar position
         fov_rad = np.radians(fov_angle)
         x_fov = [fov_distance * np.sin(-fov_rad / 2), 0, fov_distance * np.sin(fov_rad / 2)]
@@ -165,21 +166,31 @@ class Scatter3DPlot(QWidget):
         layout.addWidget(self.plot_widget)
         
         self.colormap = cm.get_cmap('jet') # 'plasma'
-        
+        self.colormapID = np.array([[1,0,0,1], [0,1,0,1], [0,0,1,1], [1,1,0,1], [1,0,1,1], [0,1,1,1], [1,0,0.5,1], [1,0.5,0,1], [0.5,1,0,1], [0,1,0.5,1], [0.5,0,1,1], [0,0.5,1,1]])
         item = CuboidItem((np.array([0,-0.1,0]) - np.array([0.1,0.05,0.05])/2), (np.array([0,-0.05,0]) + np.array([0.1,0.05,0.05])/2), color = (1,1,1,1), width = 1, minZ = -EQUIP_HEIGHT)
         self.plot_widget.addItem(item)
 
         # bar = pg.ColorBarItem( values= (0, 10), cmap=self.colormap )
         # layout.addWd(bar)
-    def writePoint(self, objs):
-        
-        z_normalized = (GRAPH_MAX_Y - objs[:,3]) / (GRAPH_MAX_Y - GRAPH_MIN_Y)
-        colors = self.colormap(z_normalized)
+    def writePoint(self, objs, ID = True):
+        if ID:
+            z_normalized = objs[:,5].astype(int)
+            z_normalized = z_normalized % len(self.colormapID)
+            colors = self.colormapID[z_normalized]
 
-        colors[:,3] = 1 #alpha
-        colors[np.where(objs[:,4] == 1)] = [0,0,1,1]
+            colors[:,3] = 1 #alpha
+            # colors[np.where(objs[:,4] == 1)] = [0,0,1,1]
 
-        sizes = np.ones(len(objs))*13
+            # sizes = np.ones(len(objs))*13
+            # sizes[np.where(objs[:,4] == 1)] = 10
+        else:
+            z_normalized = (GRAPH_MAX_Y - objs[:,3]) / (GRAPH_MAX_Y - GRAPH_MIN_Y)
+            colors = self.colormap(z_normalized)
+
+            colors[:,3] = 1 #alpha
+            colors[np.where(objs[:,4] == 1)] = [0,0,1,1]
+
+        sizes = np.ones(len(objs))*10
         sizes[np.where(objs[:,4] == 1)] = 10
 
         self.sp[self.pingpongIdx].setData(pos=np.column_stack((objs[:,0], objs[:,1], objs[:,2])), color = colors, size = sizes)
