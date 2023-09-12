@@ -1,0 +1,3 @@
+[submodule "RADAR_Algorithm"]
+	path = RADAR_Algorithm
+	url = git@github.com-peace337:peace337/RADAR_Algorithm.git
