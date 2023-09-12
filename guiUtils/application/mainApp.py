@@ -19,10 +19,10 @@ from ..drawHelper import *
 from .plotApp import *
 from ..dataParser.dataClass import *
 
-from algorithm.radarPerception.egoMotionEstimation import egoMotionEst, egoMotionEst_3D
-from algorithm.algorithmMain import RadarAlgorithm
-from algorithm.radarConfigure.configManager_MRR_DEMO import *
-from algorithm.utils import *
+from RADAR_Algorithm.radarPerception.egoMotionEstimation import egoMotionEst, egoMotionEst_3D
+from RADAR_Algorithm.algorithmMain import RadarAlgorithm
+from RADAR_Algorithm.radarConfigure.configManager_MRR_DEMO import *
+from RADAR_Algorithm.utils import *
 
 class ClusterIdCount():
     def __init__(self):

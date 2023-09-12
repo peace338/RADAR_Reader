@@ -13,6 +13,7 @@ import numpy as np
 import pyqtgraph.opengl as gl
 from matplotlib import cm
 
+from radarEquipInfo import AZIM_FOV
 class CuboidItem(gl.GLLinePlotItem):
     def __init__(self, start_point, end_point, color=(1, 0, 1, 1), width=1, minZ = None):
 
@@ -116,7 +117,7 @@ class Scatter3DPlot(QWidget):
         self.plot_widget.addItem(ROI_item)
         ROI_item.setData(pos=np.column_stack((x, y, z)), color=(255, 255, 255, 10), width=1)
 
-        fov_angle = 130
+        fov_angle = AZIM_FOV
         fov_distance = 10  # FOV distance from the radar position
         fov_rad = np.radians(fov_angle)
         x_fov = [fov_distance * np.sin(-fov_rad / 2), 0, fov_distance * np.sin(fov_rad / 2)]
