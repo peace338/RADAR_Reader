@@ -172,7 +172,7 @@ class Scatter3DPlot(QWidget):
 
         # bar = pg.ColorBarItem( values= (0, 10), cmap=self.colormap )
         # layout.addWd(bar)
-    def writePoint(self, objs, ID = True):
+    def writePoint(self, objs, ID = False):
         if ID:
             z_normalized = objs[:,5].astype(int)
             z_normalized = z_normalized % len(self.colormapID)
@@ -188,7 +188,7 @@ class Scatter3DPlot(QWidget):
             colors = self.colormap(z_normalized)
 
             colors[:,3] = 1 #alpha
-            colors[np.where(objs[:,4] == 1)] = [0,0,1,1]
+            colors[np.where(objs[:,4] == 0)] = [0,0,1,1]
 
         sizes = np.ones(len(objs))*10
         sizes[np.where(objs[:,4] == 1)] = 10
