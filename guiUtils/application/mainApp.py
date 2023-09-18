@@ -1222,7 +1222,9 @@ class App(QWidget):
         trk_spots=[]
         
         for trk in trks :
-
+            
+            if trk.age == 0: # I use age as StatusFlag, 0 is static and 1 is moving object.
+                continue
             trk_spots.append([trk.x, trk.y, trk.z, trk.x_size, trk.y_size, trk.z_size])
     
         self.scatter_plot_3d.writeCuboid(np.array(trk_spots))
@@ -1242,7 +1244,8 @@ class App(QWidget):
                 continue
             if trk.classID == 0:
                 continue
-
+            # if trk.statusFlag == 0:
+            #     continue
             trk_spots.append([trk.stateVectorXYZ[0], trk.stateVectorXYZ[1], trk.z, trk.xSize*2 + 0.2, trk.ySize*2 + 0.2, trk.zSize*2 + 0.2])
 
 
