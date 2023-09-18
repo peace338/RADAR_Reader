@@ -1242,10 +1242,10 @@ class App(QWidget):
                 continue
             if trk.stateVectorXYZ[1] < 0:
                 continue
-            if trk.classID == 0:
-                continue
-            # if trk.statusFlag == 0:
+            # if trk.classID == 0:
             #     continue
+            if trk.statusFlag == 0:
+                continue
             trk_spots.append([trk.stateVectorXYZ[0], trk.stateVectorXYZ[1], trk.z, trk.xSize*2 + 0.2, trk.ySize*2 + 0.2, trk.zSize*2 + 0.2])
 
 
