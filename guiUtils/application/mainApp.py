@@ -629,7 +629,7 @@ class App(QWidget):
     #####################################################################################
     def folder_select_btn_event(self):
         tmp_file_name = self.file_path_line_edit.text()
-        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/MOIS/20230908_thresh8/", filter = "Radar Data Bin(*.rdb)")
+        new_file_structure = QFileDialog.getOpenFileName(self, "Select File", "D://Datasets/__RADAR/AMR/20230922/", filter = "Radar Data Bin(*.rdb)")
         self.no_video_flag = 0
         self.no_video2_flag = 0
         self.no_simulation_data_flag = 0
@@ -1206,7 +1206,7 @@ class App(QWidget):
         # if filteredObjs:
 
 
-        flags, line_x, line_y, vx, vy = self.ransac(np.array(filteredObjs))
+        flags = self.ransac(np.array(filteredObjs))
         
         '''
         TODO 
@@ -1223,8 +1223,8 @@ class App(QWidget):
         
         for trk in trks :
             
-            if trk.age == 0: # I use age as StatusFlag, 0 is static and 1 is moving object.
-                continue
+            # if trk.age == 0: # I use age as StatusFlag, 0 is static and 1 is moving object.
+            #     continue
             trk_spots.append([trk.x, trk.y, trk.z, trk.x_size, trk.y_size, trk.z_size])
     
         self.scatter_plot_3d.writeCuboid(np.array(trk_spots))
@@ -1244,8 +1244,8 @@ class App(QWidget):
                 continue
             # if trk.classID == 0:
             #     continue
-            if trk.statusFlag == 0:
-                continue
+            # if trk.statusFlag == 0:
+            #     continue
             trk_spots.append([trk.stateVectorXYZ[0], trk.stateVectorXYZ[1], trk.z, trk.xSize*2 + 0.2, trk.ySize*2 + 0.2, trk.zSize*2 + 0.2])
 
 
@@ -1417,7 +1417,14 @@ class App(QWidget):
         # egoDopplerState = self.egomotion_graph_update(self.original_object_list, self.original_track_list)
         self.scatter_plot_3d.removeCuboid()
         processedOutObjects, processedOutTracker = self.algorithm(self.original_object_list)
-        self.emulated_objs_update(processedOutObjects)
+        
+        if self.simulated_object_checkbox.isChecked():
+            self.emulated_objs_update(processedOutObjects)
+        if self.original_object_checkbox.isChecked():
+            self.original_objs_update(self.original_object_list)
+        
+        
+        
         if self.original_track_checkbox.isChecked():
             self.original_trks_update(self.original_track_list)
         # self.original_graph_update(self.original_object_list, self.original_track_list)
