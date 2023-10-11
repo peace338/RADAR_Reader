@@ -40,7 +40,7 @@ class App(QWidget):
 #   Class - App ==> Drawing GUIs                                                    #
 #####################################################################################
     def initUI(self):
-        self.algorithm = RadarAlgorithm()
+        self.algorithm = RadarAlgorithm({'height' : EQUIP_HEIGHT}, {"azim_fov" : AZIM_FOV, "elev_fov" : ELEV_FOV, "max_height" : MAX_HEIGHT})
         # self.ransac = egoMotionEst()
         self.ransac = egoMotionEst_3D()
         # window_size = [1450 + 300, 800]
@@ -1420,8 +1420,8 @@ class App(QWidget):
         
         if self.simulated_object_checkbox.isChecked():
             self.emulated_objs_update(processedOutObjects)
-        if self.original_object_checkbox.isChecked():
-            self.original_objs_update(self.original_object_list)
+        # if self.original_object_checkbox.isChecked():
+            # self.original_objs_update(self.original_object_list)
         
         
         

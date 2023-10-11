@@ -189,7 +189,7 @@ class Scatter3DPlot(QWidget):
 
             colors[:,3] = 1 #alpha
             colors[np.where(objs[:,4] == 0)] = [0,0,1,1]
-        colors[:] = [0,1,0,1]
+        # colors[:] = [0,1,0,1]
         sizes = np.ones(len(objs))*10
         sizes[np.where(objs[:,4] == 1)] = 10
 
