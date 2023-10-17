@@ -1416,7 +1416,7 @@ class App(QWidget):
         self.get_original_radar_data_in_frame(self.radar_current_frame_num, IT_IS_NOT_SIMULATION, 0)       # simulation_flag = 0, radar_num = 0
         # egoDopplerState = self.egomotion_graph_update(self.original_object_list, self.original_track_list)
         self.scatter_plot_3d.removeCuboid()
-        processedOutObjects, processedOutTracker = self.algorithm(self.original_object_list)
+        processedOutObjects, processedOutTracker, _, _, _ = self.algorithm(self.original_object_list)
         
         if self.simulated_object_checkbox.isChecked():
             self.emulated_objs_update(processedOutObjects)
